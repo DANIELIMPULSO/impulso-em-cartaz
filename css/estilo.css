@@ -12,8 +12,8 @@
   --linha:#343434;
   --texto:#f4f2ee;
   --texto-fraco:#a3a09a;
-  --impulso:#f5b32d;      /* ambar da marca */
-  --impulso-escuro:#c8901f;
+  --impulso:#fdb908;      /* ambar oficial, tirado do proprio logotipo */
+  --impulso-escuro:#d49a06;
   --cortina:#e0472c;
   --verde:#5cb87a;
   --raio:14px;
@@ -21,7 +21,7 @@
   --fonte-titulo:"Anton","Oswald","Impact","Haettenschweiler",sans-serif;
   --fonte-mono:"IBM Plex Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
   /* regua degrade da marca */
-  --regua:linear-gradient(90deg,#2f6fd0,#3aa857,#f5b32d,#ef7f2a,#e0472c);
+  --regua:linear-gradient(90deg,#2f6fd0,#3aa857,#fdb908,#ef7f2a,#e0472c);
 }
 
 *{box-sizing:border-box}
@@ -37,7 +37,7 @@ body{
 }
 body::before{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
-  background:radial-gradient(ellipse at 50% -10%,rgba(245,179,45,.10),transparent 60%);
+  background:radial-gradient(ellipse at 50% -10%,rgba(253,185,8,.10),transparent 60%);
 }
 button{font-family:inherit;font-size:1rem;cursor:pointer;border:0;background:none;color:inherit}
 a{color:var(--impulso)}
@@ -61,7 +61,10 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 /* ---------- topo ---------- */
 .topo{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 10px}
 .marca{text-align:center;line-height:1}
-.marca .sobrenome{display:block;font-size:.62rem;font-weight:500;color:var(--impulso);letter-spacing:.3em}
+.marca .topo-logo{display:inline-flex;margin-bottom:3px}
+.marca .topo-logo img{height:26px}
+.marca .topo-logo .logo-texto b{font-size:1.05rem}
+.marca .topo-logo .logo-texto i{font-size:.36rem}
 .marca b{
   display:block;font-family:var(--fonte-titulo);font-weight:400;
   font-size:clamp(1.6rem,8.5vw,2.4rem);letter-spacing:.01em;color:var(--texto);
@@ -132,7 +135,7 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 .passo{width:9px;height:9px;border-radius:50%;background:var(--linha)}
 .passo.feito{background:var(--verde)}
 .passo.errado{background:var(--cortina)}
-.passo.atual{background:var(--impulso);box-shadow:0 0 0 3px rgba(245,179,45,.18)}
+.passo.atual{background:var(--impulso);box-shadow:0 0 0 3px rgba(253,185,8,.18)}
 
 /* ---------- imagem ---------- */
 .moldura{
@@ -191,7 +194,8 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 }
 .botao:hover{filter:brightness(1.08)}
 .botao.secundario{background:transparent;border:1px solid var(--linha);color:var(--texto-fraco);flex:0 0 auto}
-.botao.secundario:hover{border-color:var(--cortina);color:var(--cortina)}
+.botao.secundario:hover{border-color:var(--impulso);color:var(--impulso)}
+.botao.perigo:hover{border-color:var(--cortina);color:var(--cortina)}
 .botao:disabled{opacity:.5;cursor:not-allowed;filter:none}
 
 .tentativas{display:flex;gap:6px;justify-content:center;margin-top:10px;font-size:.62rem;color:var(--texto-fraco)}
@@ -206,8 +210,8 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 .ficha dd{margin:0}
 .ficha .curiosidade{font-size:.9rem;border-top:1px solid var(--linha);padding-top:10px;margin:0 0 10px}
 .impulso-comenta{
-  background:linear-gradient(135deg,rgba(245,179,45,.14),rgba(245,179,45,.03));
-  border:1px solid rgba(245,179,45,.35);border-radius:var(--raio);padding:12px 14px;font-size:.88rem;
+  background:linear-gradient(135deg,rgba(253,185,8,.14),rgba(253,185,8,.03));
+  border:1px solid rgba(253,185,8,.35);border-radius:var(--raio);padding:12px 14px;font-size:.88rem;
 }
 .impulso-comenta b{display:block;font-size:.58rem;color:var(--impulso);margin-bottom:5px;font-weight:500}
 .resultado-tarja{
@@ -238,7 +242,7 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 }
 .dia-quadro.jogavel{color:var(--texto)}
 .dia-quadro.completo{background:rgba(92,184,122,.2);border-color:rgba(92,184,122,.5);color:var(--texto)}
-.dia-quadro.parcial{background:rgba(245,179,45,.18);border-color:rgba(245,179,45,.5);color:var(--texto)}
+.dia-quadro.parcial{background:rgba(253,185,8,.18);border-color:rgba(253,185,8,.5);color:var(--texto)}
 .dia-quadro.hoje{outline:2px solid var(--impulso);outline-offset:2px}
 .legenda{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:.58rem;color:var(--texto-fraco)}
 .legenda i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
@@ -250,7 +254,7 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 
 /* ---------- chamada da impulso ---------- */
 .chamada{
-  background:var(--papel);border:1px solid rgba(245,179,45,.35);border-radius:var(--raio);
+  background:var(--papel);border:1px solid rgba(253,185,8,.35);border-radius:var(--raio);
   padding:0 0 20px;margin:16px 0 8px;text-align:center;overflow:hidden;
 }
 .chamada .regua{margin:0 0 18px;border-radius:0}
@@ -258,6 +262,7 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 .chamada h3{font-size:1.45rem;margin:0 0 8px}
 .chamada p{font-size:.88rem;color:var(--texto-fraco);margin:0 0 14px}
 .chamada .logo-impulso{margin-bottom:12px}
+.chamada .logo-impulso img{height:34px}
 .chamada a.cta{
   display:inline-block;background:var(--impulso);color:#171717;text-decoration:none;
   font-family:var(--fonte-titulo);letter-spacing:.06em;text-transform:uppercase;
@@ -277,7 +282,8 @@ h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:up
 
 .rodape{text-align:center;font-size:.56rem;color:var(--texto-fraco);margin-top:22px;line-height:2}
 .rodape a{color:var(--texto-fraco);text-decoration:underline}
-.rodape .logo-impulso{margin:0 2px}
+.rodape .logo-impulso{margin:0 3px}
+.rodape .logo-impulso img{height:22px;vertical-align:-6px}
 .rodape .logo-texto b{font-size:1.05rem}
 .rodape .logo-texto i{font-size:.36rem}
 
