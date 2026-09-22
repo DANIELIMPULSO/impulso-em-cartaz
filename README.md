@@ -14,10 +14,19 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
 - **4 tentativas** por cartaz. Acertar de primeira vale 4 pontos; depois 3, 2 e 1.
   Cada sessão vale até **16 pontos**.
 - O cartaz aparece quadriculado: 14 quadradinhos de largura na primeira
-  tentativa, depois 24, 44 e 90 (`blocosPorEtapa`, no `config.js`). A primeira
+  tentativa, depois 24, 40 e 90 (`blocosPorEtapa`, no `config.js`). A primeira
   versão usava desfoque e foi trocada — desfoque forte apaga até a composição e
   não dá chance nenhuma, enquanto o mosaico preserva massa de cor, recorte de
   figura e diagramação, que é do que o cinéfilo precisa para arriscar.
+- Até a última tentativa o cartaz entra **sem a faixa de baixo**
+  (`recortePorEtapa`): é onde quase todo pôster escreve o título, e com 40
+  quadradinhos dava para ler. A alternativa seria borrar, mas aí a imagem volta
+  a parecer desfoque. No último cartaz o pôster inteiro aparece — é quando deve
+  ficar fácil.
+- **Cada erro devolve informação**: o palpite volta comparado com o filme do dia
+  em gênero, país, ano e direção — verde igual, amarelo perto, vermelho longe,
+  com seta indicando se o filme do dia é mais recente ou mais antigo. As regras
+  de proximidade estão em `js/comparar.js`.
 - A cada erro a imagem ganha definição e entra uma dica nova:
 
   | Momento | O que aparece |
@@ -156,6 +165,7 @@ dados/filmes.js            o acervo: 234 filmes                            ← m
 dados/piadas.js            os textos de marca ("A Impulso comenta")        ← mexa aqui
 js/util.js                 texto, sorteio estável, datas, armazenamento
 js/calendario.js           qual filme cai em que dia
+js/comparar.js             regras do quadro de palpites (o que é "perto")
 js/imagens.js              resolução e cache de cartazes
 js/jogo.js                 motor, telas e arquivo de partidas
 ferramentas/diagnostico.html   conferência de cartazes

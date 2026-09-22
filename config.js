@@ -26,7 +26,13 @@ window.CARTAZ_CONFIG = {
      tentativa ate a ultima. Numero menor = mais dificil. Desfoque escondia
      ate a composicao e nao dava chance; o mosaico deixa massa de cor, recorte
      de figura e diagramacao aparecerem, que e do que o cinefilo precisa. */
-  blocosPorEtapa: [14, 24, 44, 90],
+  blocosPorEtapa: [14, 24, 40, 90],
+  /* Quanto do cartaz (de cima pra baixo) entra em cada etapa. Cartaz tem o
+     titulo escrito nele, quase sempre no terco de baixo: com 40 quadradinhos
+     dava pra ler e o jogo acabava ali. Cortando a faixa de baixo ate a ultima
+     tentativa, o mosaico continua nitido e o nome nao aparece — e no ultimo
+     cartaz o poster inteiro entra, que e quando deve ficar facil. */
+  recortePorEtapa: [0.72, 0.72, 0.72, 1],
   sessoes: [
     { id: 1, nome: "Matinê",             abertura: "Quatro cartazes pra começar o dia." },
     { id: 2, nome: "Sessão da Meia-Noite", abertura: "Mais quatro, e agora sem dó." }

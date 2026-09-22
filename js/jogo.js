@@ -284,11 +284,14 @@
       '<div class="rodape-acao"><span class="tentativas" id="tentativas"></span>' +
       '<button class="desisto" id="btn-pular">desisto desta</button></div>' +
       '<div id="ultimo-erro"></div>' +
+      '<div class="palpites" id="palpites"></div>' +
       "</div></div>";
 
     montarImagem($("moldura"), filme, item.erros.length);
     montarDicas(filme, item.erros.length);
     montarTentativas(item);
+    montarPalpites(item, filme);
+    $("tela-jogo").classList.toggle("tem-palpites", (item.palpites || []).length > 0);
     ligarEntrada();
     mostrar("jogo");
 
@@ -309,8 +312,8 @@
      os pixels de volta; exibir, que e o que interessa aqui, continua valendo.
      Por isso nao se pede crossOrigin: pedir CORS numa imagem que ja esta em
      cache sem CORS faria o navegador recusar a imagem inteira. */
-  function recorteCobrindo(img, proporcao) {
-    var lf = img.naturalWidth, af = img.naturalHeight;
+  function recorteCobrindo(img, proporcao, fatia) {
+    var lf = img.naturalWidth, af = img.naturalHeight * (fatia || 1);
     var pf = lf / af;
     if (pf > proporcao) {                 /* sobra largura: corta dos lados */
       var l = af * proporcao;
@@ -320,7 +323,7 @@
     return [0, (af - a) / 2, lf, a];
   }
 
-  function quadricular(moldura, img, blocos) {
+  function quadricular(moldura, img, blocos, fatia) {
     /* a proporcao vem do quadro como ele esta na tela, e nao de um valor fixo:
        no celular a moldura fica quase quadrada por causa do limite de altura,
        e um canvas 2:3 seria recortado de novo pelo object-fit, deixando o
@@ -332,7 +335,7 @@
     tela.width = Math.max(4, blocos);
     tela.height = Math.max(4, Math.round(blocos / proporcao));
     var pincel = tela.getContext("2d");
-    var r = recorteCobrindo(img, proporcao);
+    var r = recorteCobrindo(img, proporcao, fatia);
     pincel.drawImage(img, r[0], r[1], r[2], r[3], 0, 0, tela.width, tela.height);
     moldura.innerHTML = "";
     moldura.appendChild(tela);
@@ -350,8 +353,10 @@
           moldura.innerHTML = "";
           moldura.appendChild(img);
         } else {
-          var escada = CFG.blocosPorEtapa || [14, 24, 44, 90];
-          quadricular(moldura, img, escada[Math.min(etapa, escada.length - 1)]);
+          var escada = CFG.blocosPorEtapa || [14, 24, 40, 90];
+          var fatias = CFG.recortePorEtapa || [1, 1, 1, 1];
+          var n = Math.min(etapa, escada.length - 1);
+          quadricular(moldura, img, escada[n], fatias[Math.min(n, fatias.length - 1)]);
         }
         if (r.gerada) {
           var et = document.createElement("span");
@@ -378,6 +383,34 @@
       var longa = String(l[1]).length > 34 ? " longa" : "";
       return '<div class="dica' + longa + '"><b>' + esc(l[0]) + "</b><span>" + esc(l[1]) + "</span></div>";
     }).join("");
+  }
+
+  /* Quadro de palpites: cada erro vira uma linha com quatro colunas
+     comparando o filme chutado com o do dia. E o que transforma errar em
+     informacao, em vez de so perder uma tentativa. */
+  function montarPalpites(item, filme) {
+    var alvo = $("palpites");
+    if (!alvo) return;
+    var lista = item.palpites || [];
+    if (!lista.length) { alvo.innerHTML = ""; return; }
+
+    var html = '<div class="dica-titulo">Seus palpites</div>';
+    lista.forEach(function (id, n) {
+      var chute = id ? CAL.porId(id) : null;
+      if (!chute) {
+        html += '<div class="palpite-linha"><span class="palpite-nome">' +
+          esc(item.erros[n] || "—") + '</span><span class="palpite-fora">fora do acervo</span></div>';
+        return;
+      }
+      var celulas = global.COMPARAR.linhas(chute, filme).map(function (c) {
+        return '<span class="celula ' + c.cor + '"><b>' + esc(c.rotulo) + "</b>" +
+          '<span class="v">' + esc(c.valor) + "</span></span>";
+      }).join("");
+      html += '<div class="palpite-linha"><span class="palpite-nome">' +
+        esc(chute.titulo) + "</span>" +
+        '<span class="celulas">' + celulas + "</span></div>";
+    });
+    alvo.innerHTML = html;
   }
 
   function montarTentativas(item) {
@@ -463,6 +496,16 @@
 
   /* ---------- palpite ---------- */
 
+  /* o que a pessoa digitou vira filme do acervo, pra poder comparar; se ela
+     escreveu qualquer coisa que nao existe, o palpite entra sem comparacao */
+  function porTitulo(texto) {
+    for (var i = 0; i < INDICE.length; i++) {
+      if (U.acertou(texto, INDICE[i].f)) return INDICE[i].f;
+    }
+    return null;
+  }
+
+
   function enviar(texto) {
     if (!texto || !U.normalizar(texto)) return;
     var ctx = itemAtual(), p = ctx.p, item = ctx.item, filme = ctx.filme;
@@ -475,7 +518,10 @@
       return telaRevelacao();
     }
 
+    var chutado = porTitulo(texto);
     item.erros.push(String(texto).slice(0, 80));
+    if (!item.palpites) item.palpites = [];
+    item.palpites.push(chutado ? chutado.id : null);
     if (item.erros.length >= CFG.tentativasPorDesafio) {
       item.fim = true;
       item.pontos = 0;
@@ -491,6 +537,8 @@
     montarImagem($("moldura"), filme, item.erros.length);
     montarDicas(filme, item.erros.length);
     montarTentativas(item);
+    montarPalpites(item, filme);
+    $("tela-jogo").classList.add("tem-palpites");
     $("ultimo-erro").innerHTML = '<div class="erro-anterior">' + esc(texto) + " não é. Olha de novo.</div>";
   }
 
@@ -838,7 +886,16 @@
       "<p>Todo dia o " + CFG.nome + " abre <b>duas sessões</b> de <b>quatro cartazes</b> cada. " +
       "A imagem começa desfocada e ampliada; a cada erro ela clareia e aparece uma dica nova.</p>" +
       "<ul>" +
+      "<li>O cartaz aparece <b>quadriculado</b> e ganha definição a cada erro. Até a " +
+      "última tentativa ele entra sem a faixa de baixo, onde costuma ficar o título escrito.</li>" +
       "<li>Você tem <b>4 tentativas</b> por cartaz. Acertar de primeira vale 4 pontos, depois 3, 2 e 1.</li>" +
+      "<li>Errar também informa: cada palpite volta comparado com o filme do dia em " +
+      "<b>gênero, país, ano e direção</b>. " +
+      '<span class="celula verde" style="display:inline-flex">verde</span> igual, ' +
+      '<span class="celula amarelo" style="display:inline-flex">amarelo</span> perto ' +
+      "(vertente vizinha, mesma região, até duas décadas), " +
+      '<span class="celula vermelho" style="display:inline-flex">vermelho</span> longe. ' +
+      "No ano, a seta diz a direção: ↑ o filme do dia é mais recente, ↓ mais antigo.</li>" +
       "<li>Pode digitar o título em português ou o original — o campo sugere enquanto você escreve.</li>" +
       "<li>A <b>" + esc(CFG.sessoes[1].nome) + "</b> abre quando você termina a <b>" + esc(CFG.sessoes[0].nome) + "</b>.</li>" +
       "<li>Perdeu dias? A <b>Cinemateca</b> (no ▦ lá em cima) libera tudo desde o dia 1.</li>" +
