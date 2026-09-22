@@ -104,12 +104,26 @@ resolvida no navegador de quem joga, nesta ordem:
    em inglês, e por fim uma busca;
 5. um **cartaz tipográfico** gerado na hora — assim nunca fica buraco na tela.
 
-A resolução passa duas vezes pela lista: na primeira só aceita imagem **em pé**,
-que é o formato de cartaz, o que descarta foto de cena, logotipo de estúdio e
-retrato de diretor — coisas que a Wikipedia às vezes usa como imagem principal
-do verbete. Só se nenhuma fonte tiver cartaz é que a segunda passada aceita o
-que houver. Nas buscas, o resultado ainda precisa ter uma palavra forte do
-título no nome da página, para não cair num verbete vizinho.
+A resolução passa duas vezes pela lista. Na primeira, a imagem precisa passar
+em três provas:
+
+- **estar em pé**, que é o formato de cartaz — descarta foto de cena, logotipo
+  de estúdio e retrato de diretor, que a Wikipedia às vezes usa como imagem
+  principal do verbete;
+- **estar hospedada no próprio idioma** (`/wikipedia/en/`, `/wikipedia/pt/`) e
+  não no Commons. Cartaz oficial é material protegido e fica no arquivo local,
+  sob uso justo; o Commons só aceita imagem livre, que é onde moram arte de fã,
+  pôster alternativo e foto de divulgação;
+- nas buscas, **ter uma palavra forte do título** no nome da página, para não
+  cair num verbete vizinho.
+
+Só se nenhuma fonte passar é que a segunda passada aceita o que houver — e ela
+é necessária: filme antigo em domínio público tem o cartaz *oficial* no Commons,
+justamente porque já é livre.
+
+Nada disso decide se a imagem é o pôster **oficial** daquele filme; para isso
+existe o seletor na ferramenta de conferência, e para resolver na raiz existe o
+TMDB (veja abaixo).
 
 O resultado fica em cache no aparelho de quem joga por 30 dias.
 

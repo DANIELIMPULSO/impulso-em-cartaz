@@ -27,6 +27,19 @@
     letter-spacing:.08em;cursor:pointer}
   .item .marcar:hover{border-color:var(--cortina);color:var(--cortina)}
   .item.marcado .marcar{border-color:var(--impulso);color:var(--impulso)}
+  .seletor{padding:8px;border-top:1px solid var(--linha);background:rgba(0,0,0,.25)}
+  .carregando-alt,.vazio{font-size:.66rem;color:var(--texto-fraco);text-align:center;padding:8px 0;margin:0}
+  .alternativas{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:8px}
+  .alt{border:1px solid var(--linha);background:none;border-radius:8px;padding:0;overflow:hidden;cursor:pointer}
+  .alt:hover{border-color:var(--impulso)}
+  .alt img{width:100%;height:96px;object-fit:cover;display:block;background:#000}
+  .alt span{display:block;font-size:.5rem;color:var(--texto-fraco);padding:3px 2px;word-break:break-all}
+  .url-manual{width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--linha);
+    background:var(--papel);color:var(--texto);font-size:.66rem;margin-bottom:6px}
+  .usar-manual{width:100%;border:1px solid var(--linha);background:transparent;color:var(--texto-fraco);
+    border-radius:6px;padding:5px;font-size:.6rem;font-family:var(--fonte-mono);text-transform:uppercase;
+    letter-spacing:.08em;cursor:pointer}
+  .usar-manual:hover{border-color:var(--impulso);color:var(--impulso)}
   .progresso{height:4px;background:var(--linha);border-radius:2px;overflow:hidden;margin-bottom:12px}
   .progresso i{display:block;height:100%;background:var(--impulso);width:0;transition:width .2s}
   textarea{width:100%;height:150px;background:var(--papel);color:var(--texto);border:1px solid var(--linha);border-radius:10px;padding:10px;font-family:monospace;font-size:.75rem}
@@ -54,16 +67,18 @@
 
   <section style="margin:24px 0;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:16px">
     <h2 style="font-family:var(--fonte-titulo);font-weight:400;letter-spacing:.04em;font-size:1.2rem;margin:0 0 6px">
-      CARTAZES ERRADOS</h2>
+      CORRIGIR CARTAZ</h2>
     <p style="color:var(--texto-fraco);font-size:.85rem;margin:0 0 10px">
       A conferência automática só sabe dizer se <b>achou</b> imagem. Se a imagem é mesmo o
-      pôster oficial daquele filme, só olho humano resolve — role a lista e clique em
-      <b>cartaz errado</b> nos que não forem. A marcação fica salva neste navegador.
+      pôster oficial daquele filme, só olho humano resolve. Clique em <b>cartaz errado</b>
+      no filme: ele mostra as outras imagens que as fontes oferecem e você aponta a certa,
+      ou cola o endereço de uma de fora. A escolha vale na hora neste navegador; copie a
+      lista e mande para fixar no acervo, valendo para todo mundo.
     </p>
     <textarea id="marcados" style="height:120px"></textarea>
     <div class="barra" style="margin-top:8px">
-      <button id="b-copiar-marcados">Copiar marcados</button>
-      <button id="b-limpar-marcados">Limpar marcações</button>
+      <button id="b-copiar-marcados">Copiar correções</button>
+      <button id="b-limpar-marcados">Limpar correções</button>
     </div>
   </section>
 
@@ -94,9 +109,9 @@
 
   let falhas = [];
   let cartoes = {};
-  const CHAVE_MARCADOS = "cartaz.v1.marcados";
-  let marcados = {};
-  try { marcados = JSON.parse(localStorage.getItem(CHAVE_MARCADOS)) || {}; } catch (e) { marcados = {}; }
+  const CHAVE_ESCOLHAS = "cartaz.v1.escolhas";
+  let escolhas = {};
+  try { escolhas = JSON.parse(localStorage.getItem(CHAVE_ESCOLHAS)) || {}; } catch (e) { escolhas = {}; }
   let execucao = 0;   // duas conferencias ao mesmo tempo dobram os pedidos e
                       // fazem a Wikipedia cortar: so uma roda por vez
 
@@ -110,33 +125,67 @@
       cartoes[filme.id] = d;
       grade.appendChild(d);
     }
-    d.className = "item" + (ok ? "" : " falhou") + (marcados[filme.id] ? " marcado" : "");
+    d.className = "item" + (ok ? "" : " falhou") + (escolhas[filme.id] ? " marcado" : "");
     d.innerHTML =
       '<img loading="lazy" src="' + r.url + '" alt="">' +
       '<div class="txt"><b>' + filme.titulo + "</b> (" + filme.ano + ")" +
       '<div class="fonte">' + (ok ? r.fonte : "NENHUMA IMAGEM") + "</div>" +
-      '<button class="marcar">' + (marcados[filme.id] ? "✓ marcado" : "cartaz errado") + "</button>" +
+      '<button class="marcar">' + (escolhas[filme.id] ? "✓ corrigido — trocar" : "cartaz errado") + "</button>" +
       "</div>";
-    d.querySelector(".marcar").onclick = function () {
-      if (marcados[filme.id]) delete marcados[filme.id];
-      else marcados[filme.id] = filme.titulo + " (" + filme.ano + ")";
-      localStorage.setItem(CHAVE_MARCADOS, JSON.stringify(marcados));
-      cartao(filme, r);
-      listarMarcados();
+    d.querySelector(".marcar").onclick = function () { abrirSeletor(filme, d); };
+  }
+
+  /* Seletor de cartaz: mostra tudo que as fontes oferecem pra aquele filme e
+     deixa a pessoa apontar o certo — ou colar o endereco de um de fora. */
+  async function abrirSeletor(filme, cartaoEl) {
+    let painel = cartaoEl.querySelector(".seletor");
+    if (painel) { painel.remove(); return; }
+    painel = document.createElement("div");
+    painel.className = "seletor";
+    painel.innerHTML = '<div class="carregando-alt">procurando outras imagens…</div>';
+    cartaoEl.appendChild(painel);
+
+    const lista = await IMG.alternativas(filme);
+    painel.innerHTML =
+      (lista.length
+        ? '<div class="alternativas">' + lista.map(function (a, i) {
+            return '<button class="alt" data-url="' + a.url + '">' +
+              '<img src="' + a.url + '" alt=""><span>' + a.fonte + "</span></button>";
+          }).join("") + "</div>"
+        : '<p class="vazio">Nenhuma outra imagem encontrada nas fontes.</p>') +
+      '<input class="url-manual" placeholder="ou cole aqui o endereço da imagem certa">' +
+      '<button class="usar-manual">Usar este endereço</button>';
+
+    painel.querySelectorAll(".alt").forEach(function (b) {
+      b.onclick = function () { escolher(filme, b.dataset.url, cartaoEl); };
+    });
+    painel.querySelector(".usar-manual").onclick = function () {
+      const v = painel.querySelector(".url-manual").value.trim();
+      if (v) escolher(filme, v, cartaoEl);
     };
+  }
+
+  function escolher(filme, url, cartaoEl) {
+    escolhas[filme.id] = url;
+    localStorage.setItem(CHAVE_ESCOLHAS, JSON.stringify(escolhas));
+    IMG.fixar(filme, url);
+    const painel = cartaoEl.querySelector(".seletor");
+    if (painel) painel.remove();
+    cartao(filme, { url: url, fonte: "escolhida", gerada: false });
+    listarMarcados();
   }
 
   /* A conferencia automatica so sabe dizer se ACHOU imagem; se a imagem e
      mesmo o cartaz oficial daquele filme, so olho humano resolve. Daí o botao:
      você marca os errados enquanto rola a lista e manda a lista pronta. */
   function listarMarcados() {
-    var ids = Object.keys(marcados);
-    var caixa = document.getElementById("marcados");
+    const ids = Object.keys(escolhas);
+    const caixa = document.getElementById("marcados");
     if (!ids.length) {
-      caixa.value = "Nenhum cartaz marcado. Clique em \"cartaz errado\" nos que não forem o pôster oficial.";
+      caixa.value = 'Nenhuma correção ainda. Clique em "cartaz errado" no filme e escolha a imagem certa.';
       return;
     }
-    caixa.value = ids.map(function (id) { return id + "  —  " + marcados[id]; }).join("\n");
+    caixa.value = ids.map(function (id) { return id + "  ->  " + escolhas[id]; }).join("\n");
   }
 
   function resumo(total, aviso) {
@@ -243,8 +292,8 @@
     setTimeout(function () { b.textContent = "Copiar marcados"; }, 1500);
   };
   document.getElementById("b-limpar-marcados").onclick = function () {
-    marcados = {};
-    localStorage.removeItem(CHAVE_MARCADOS);
+    escolhas = {};
+    localStorage.removeItem(CHAVE_ESCOLHAS);
     listarMarcados();
     rodar(document.getElementById("b-tudo").classList.contains("ativo") ? CAL.acervo : doDia());
   };

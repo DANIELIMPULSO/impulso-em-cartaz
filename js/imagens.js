@@ -92,6 +92,17 @@
     return t.height / t.width >= 1.15;
   }
 
+  /* Cartaz oficial e material protegido: a Wikipedia hospeda esse tipo de
+     imagem no proprio idioma (/wikipedia/en/, /wikipedia/pt/), sob uso justo.
+     O Commons (/wikipedia/commons/) so aceita imagem livre — que e onde moram
+     arte de fa, poster alternativo e foto de divulgacao. Preferir o arquivo
+     local evita justamente o cartaz feito por fa.
+     Ressalva: filme antigo em dominio publico tem o cartaz OFICIAL no Commons,
+     e por isso esta regra vale so na primeira passada; a segunda aceita. */
+  function hospedagemLocal(url) {
+    return url.indexOf("/wikipedia/commons/") < 0;
+  }
+
   /* Numa busca, o primeiro resultado pode ser outro verbete ("lista de filmes
      de...", a obra que inspirou, o remake). Exige que o titulo da pagina tenha
      ao menos uma palavra forte do filme procurado. */
@@ -125,6 +136,7 @@
       if (!p || !p.thumbnail || !p.thumbnail.source) continue;
       if (!tituloBate(p, exig.palavras)) continue;
       if (exig.emPe && !emPe(p)) continue;
+      if (exig.local && !hospedagemLocal(p.thumbnail.source)) continue;
       var origem = p.original && p.original.source;
       /* imagens muito grandes pesam no celular: so uso a original se for
          de tamanho razoavel */
@@ -141,7 +153,7 @@
     return jsonTeimoso(url, ctx).then(function (d) {
       /* verbete pedido pelo titulo exato: nao precisa conferir o nome da
          pagina, so o formato da imagem */
-      return paginaComImagem(d, { emPe: exig && exig.emPe });
+      return paginaComImagem(d, { emPe: exig && exig.emPe, local: exig && exig.local });
     });
   }
 
@@ -175,6 +187,7 @@
         buscar: function (exig) {
           return wikiPorBusca(lang, termo, ctx, {
             emPe: exig && exig.emPe,
+            local: exig && exig.local,
             palavras: palavrasFortes(lang === "pt" ? filme.titulo : (filme.original || filme.titulo))
           });
         }
@@ -280,7 +293,7 @@
        cartaz; se nenhuma fonte tiver cartaz, a segunda aceita o que houver,
        porque uma foto de cena ainda e melhor que cartaz nenhum. */
     var lista = candidatos(filme, ctx);
-    var p = tentarEmSequencia(filme, lista, 0, { emPe: true })
+    var p = tentarEmSequencia(filme, lista, 0, { emPe: true, local: true })
       .then(function (achado) {
         return achado || tentarEmSequencia(filme, lista, 0, { emPe: false });
       })
@@ -295,6 +308,37 @@
       });
     pendentes[filme.id] = p;
     return p;
+  }
+
+  /* Todas as imagens que as fontes oferecem pra um filme, e nao so a primeira
+     que serve. E o que a ferramenta de conferencia usa pra deixar a pessoa
+     escolher o cartaz certo quando a escolha automatica erra o filme — coisa
+     que nenhum codigo sabe julgar sozinho. */
+  function alternativas(filme) {
+    var ctx = { instavel: false };
+    var lista = candidatos(filme, ctx);
+    return Promise.all(lista.map(function (passo) {
+      return Promise.resolve()
+        .then(function () { return passo.buscar({ emPe: false }); })
+        .then(function (url) {
+          if (!url) return null;
+          return carregar(url).then(function () {
+            return { url: url, fonte: passo.fonte };
+          });
+        })
+        .catch(function () { return null; });
+    })).then(function (achados) {
+      var vistos = {}, saida = [];
+      achados.forEach(function (a) {
+        if (a && !vistos[a.url]) { vistos[a.url] = 1; saida.push(a); }
+      });
+      return saida;
+    });
+  }
+
+  /* fixa uma imagem escolhida a mao, valendo por 30 dias como qualquer outra */
+  function fixar(filme, url) {
+    guardar(filme.id || filme, { url: url, fonte: "escolhida", ts: agora() });
   }
 
   function precarregar(filmes) {
@@ -317,6 +361,8 @@
     resolver: resolver,
     precarregar: precarregar,
     esquecer: esquecer,
+    alternativas: alternativas,
+    fixar: fixar,
     cartazGerado: cartazGerado,
     limparCache: limparCache
   };
