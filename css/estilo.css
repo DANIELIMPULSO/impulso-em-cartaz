@@ -68,6 +68,11 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
    "admite um" e carimbo de utilizado. O picote e feito com dois circulos da
    cor do fundo sobre a linha tracejada. */
 .abertura{padding:10px 0 24px;text-align:center}
+/* credito de cartaz: o "apresenta" vem antes da marquise, como num poster */
+.abertura .apresenta{
+  font-family:var(--fonte-mono);font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--fraco);margin:0 0 14px;
+}
 
 /* letreiro de cinema: painel claro de letras avulsas, moldura escura e
    lampadas em volta. As lampadas sao quatro camadas de fundo — uma por borda —
@@ -103,7 +108,8 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
   color:#5a574c;font-family:var(--fonte-mono);font-size:.62rem;letter-spacing:.16em;
   text-transform:uppercase;margin:9px auto 0;white-space:nowrap;
 }
-.abertura .apresentacao{color:var(--fraco);font-size:.9rem;margin:18px auto 0;max-width:34ch}
+.abertura .apresentacao{color:var(--fraco);font-size:.87rem;margin:18px auto 0;max-width:40ch;line-height:1.55}
+.abertura .apresentacao b{color:var(--texto);font-weight:500}
 
 .lista-sessoes{display:flex;flex-direction:column;gap:16px}
 
@@ -376,7 +382,8 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
   .marquise .painel{padding:24px 22px 20px}
   .marquise h1{font-size:3.9rem}
   .marquise .data{font-size:.68rem}
-  .abertura .apresentacao{max-width:46ch;font-size:.95rem}
+  .abertura .apresenta{font-size:.62rem;margin-bottom:18px}
+  .abertura .apresentacao{max-width:54ch;font-size:.97rem}
   .lista-sessoes{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:880px;margin:0 auto;align-items:stretch}
   .ingresso{grid-template-columns:1fr 96px}
   .ingresso .furo{right:96px}

@@ -111,12 +111,14 @@
     var d = U.dataDoDia(CFG.dataInicio, estado.dia);
     var html =
       '<div class="abertura">' +
+      '<p class="apresenta">A Impulso Filmes apresenta</p>' +
       '<div class="marquise"><div class="painel">' +
       "<h1>Em Cartaz</h1>" +
       '<p class="data">Dia ' + estado.dia + " · " + U.dataCurta(d) + "</p>" +
       "</div></div>" +
-      '<p class="apresentacao">Oito cartazes quadriculados, em duas sessões. ' +
-      "Quatro tentativas em cada um — e a imagem ganha definição a cada erro.</p></div>" +
+      '<p class="apresentacao">Reconhecer um filme pelo cartaz é fácil. ' +
+      "Com quatorze quadradinhos, nem tanto. <b>Oito por dia, em duas sessões</b> — " +
+      "quatro tentativas cada, e a imagem só clareia quando você erra.</p></div>" +
       '<div class="lista-sessoes">';
 
     CFG.sessoes.forEach(function (s, i) {
