@@ -12,12 +12,11 @@ window.CARTAZ_CONFIG = {
 
   /* --- calendario ---
      DIA 1 do jogo. Todo dia depois disso ganha um numero, e quem chega
-     atrasado pode jogar os dias anteriores na Cinemateca. Esta marcado cinco
-     dias antes da estreia de proposito: assim a Cinemateca ja abre com
-     acervo, e quem chega no primeiro dia tem o que jogar alem da rodada
-     do dia.
+     atrasado pode jogar os dias anteriores na Cinemateca.
+     Zerado para o teste: hoje e o dia 1. Na hora de divulgar de verdade,
+     recuar esta data alguns dias faz a Cinemateca ja nascer com acervo.
      Nao mude depois de publicar: a numeracao dos dias mudaria junto. */
-  dataInicio: "2026-09-17",
+  dataInicio: "2026-09-22",
 
   /* --- partida --- */
   desafiosPorSessao: 4,
@@ -78,8 +77,8 @@ window.CARTAZ_CONFIG = {
   /* --- textos --- */
   creditoImagens: "Imagens: Wikipedia / TMDB · uso ilustrativo, sem fins comerciais diretos.",
   chamada: {
-    titulo: "Gostou de reconhecer um bom enquadramento?",
-    texto: "A Impulso Filmes faz vídeo institucional, publicitário e de conteúdo para indústrias e grandes marcas. Mesmo cuidado de cinema, só que com briefing, prazo e objetivo de negócio.",
+    titulo: "Quem faz esse joguinho também faz filme",
+    texto: "A Impulso Filmes é uma produtora de Juiz de Fora que atende o Brasil inteiro. Filme publicitário, vídeo institucional e branded content para empresas e indústrias — e, como núcleo criativo, projetos autorais em cinema e TV. No mercado desde 2013.",
     botao: "Conhecer a Impulso"
   }
 };
