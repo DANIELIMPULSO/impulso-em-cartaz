@@ -12,9 +12,12 @@ window.CARTAZ_CONFIG = {
 
   /* --- calendario ---
      DIA 1 do jogo. Todo dia depois disso ganha um numero, e quem chega
-     atrasado pode jogar os dias anteriores na Cinemateca.
+     atrasado pode jogar os dias anteriores na Cinemateca. Esta marcado cinco
+     dias antes da estreia de proposito: assim a Cinemateca ja abre com
+     acervo, e quem chega no primeiro dia tem o que jogar alem da rodada
+     do dia.
      Nao mude depois de publicar: a numeracao dos dias mudaria junto. */
-  dataInicio: "2026-09-22",
+  dataInicio: "2026-09-17",
 
   /* --- partida --- */
   desafiosPorSessao: 4,

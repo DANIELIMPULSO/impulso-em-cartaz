@@ -14,8 +14,15 @@
 
   function valido(reg) {
     if (!reg) return false;
-    var dias = reg.url ? (CFG.diasDeCacheDeImagem || 30) : 2;
-    return (agora() - reg.ts) < dias * 86400000;
+    if (reg.url) return (agora() - reg.ts) < (CFG.diasDeCacheDeImagem || 30) * 86400000;
+    /* Guardar "nao achei" por muito tempo e perigoso: se a falha veio de rede
+       instavel ou de limite de pedidos, o filme ficaria dias mostrando o
+       cartaz tipografico. So confio no "nao achei" que foi gravado sabendo
+       que a rede estava boa (instavel === false); o que veio de tropeco vale
+       uma hora, e registro velho, sem esse dado, nao vale nada. */
+    if (reg.instavel === false) return (agora() - reg.ts) < 2 * 86400000;
+    if (reg.instavel === true) return (agora() - reg.ts) < 3600000;
+    return false;
   }
 
   function guardar(id, reg) {
@@ -40,8 +47,37 @@
 
   function json(url) {
     return fetch(url, { mode: "cors", credentials: "omit" }).then(function (r) {
-      if (!r.ok) throw new Error(r.status);
+      if (!r.ok) {
+        var e = new Error("http " + r.status);
+        e.http = r.status;
+        throw e;
+      }
       return r.json();
+    });
+  }
+
+  function esperar(ms) {
+    return new Promise(function (ok) { setTimeout(ok, ms); });
+  }
+
+  /* A Wikipedia responde 429 quando leva uma rajada de pedidos — foi o que
+     derrubou a primeira conferencia do acervo. Duas retentativas com espera
+     crescente resolvem sem judiar do servidor. O ctx anota que a rede vacilou,
+     pra nao gravar um "nao achei" que na verdade foi bloqueio. */
+  function jsonTeimoso(url, ctx, tentativa) {
+    tentativa = tentativa || 0;
+    return json(url).catch(function (e) {
+      /* 429 e 5xx sao o servidor pedindo calma: vale insistir devagar.
+         Erro sem status e rede fora ou dominio bloqueado — ai insistir so
+         faria a pessoa esperar mais pra ver o mesmo cartaz tipografico. */
+      var pedindoCalma = e.http === 429 || e.http >= 500;
+      if (!e.http || pedindoCalma) { if (ctx) ctx.instavel = true; }
+      if (pedindoCalma && tentativa < 2) {
+        return esperar(600 * Math.pow(3, tentativa)).then(function () {
+          return jsonTeimoso(url, ctx, tentativa + 1);
+        });
+      }
+      throw e;
     });
   }
 
@@ -69,32 +105,32 @@
     return null;
   }
 
-  function wikiPorTitulo(lang, titulo) {
+  function wikiPorTitulo(lang, titulo, ctx) {
     var url = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json" +
       "&origin=*&redirects=1&prop=pageimages&piprop=original%7Cthumbnail&pithumbsize=720" +
       "&titles=" + encodeURIComponent(titulo);
-    return json(url).then(paginaComImagem);
+    return jsonTeimoso(url, ctx).then(paginaComImagem);
   }
 
-  function wikiPorBusca(lang, termo) {
+  function wikiPorBusca(lang, termo, ctx) {
     var url = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json" +
       "&origin=*&prop=pageimages&piprop=original%7Cthumbnail&pithumbsize=720" +
       "&generator=search&gsrlimit=3&gsrsearch=" + encodeURIComponent(termo);
-    return json(url).then(paginaComImagem);
+    return jsonTeimoso(url, ctx).then(paginaComImagem);
   }
 
-  function tentativasWiki(filme) {
+  function tentativasWiki(filme, ctx) {
     var idiomas = CFG.wikiIdiomas || ["pt", "en"];
     var lista = [];
     idiomas.forEach(function (lang) {
       var titulo = filme.wiki && filme.wiki[lang];
-      if (titulo) lista.push({ fonte: "wikipedia:" + lang, buscar: wikiPorTitulo.bind(null, lang, titulo) });
+      if (titulo) lista.push({ fonte: "wikipedia:" + lang, buscar: wikiPorTitulo.bind(null, lang, titulo, ctx) });
     });
     idiomas.forEach(function (lang) {
       var termo = (lang === "pt")
         ? filme.titulo + " filme " + filme.ano
         : (filme.original || filme.titulo) + " " + filme.ano + " film";
-      lista.push({ fonte: "wikipedia:" + lang + ":busca", buscar: wikiPorBusca.bind(null, lang, termo) });
+      lista.push({ fonte: "wikipedia:" + lang + ":busca", buscar: wikiPorBusca.bind(null, lang, termo, ctx) });
     });
     return lista;
   }
@@ -107,14 +143,14 @@
     return (global.U.hash(filme.id) % 3) === 0; /* no modo misto, 1 em cada 3 */
   }
 
-  function tmdb(filme) {
+  function tmdb(filme, ctx) {
     var chave = CFG.tmdbApiKey;
     if (!chave) return Promise.resolve(null);
     var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(chave) +
       "&language=" + encodeURIComponent(CFG.tmdbIdioma || "pt-BR") +
       "&year=" + filme.ano +
       "&query=" + encodeURIComponent(filme.original || filme.titulo);
-    return json(url).then(function (d) {
+    return jsonTeimoso(url, ctx).then(function (d) {
       var r = d && d.results && d.results[0];
       if (!r) return null;
       var still = querStill(filme) && r.backdrop_path;
@@ -151,7 +187,7 @@
 
   /* ---------- resolucao ---------- */
 
-  function candidatos(filme) {
+  function candidatos(filme, ctx) {
     var lista = [];
     if (filme.imagem) {
       lista.push({ fonte: "manual", buscar: function () { return Promise.resolve(filme.imagem); } });
@@ -163,9 +199,9 @@
       });
     }
     if (CFG.tmdbApiKey) {
-      lista.push({ fonte: "tmdb", buscar: function () { return tmdb(filme); } });
+      lista.push({ fonte: "tmdb", buscar: function () { return tmdb(filme, ctx); } });
     }
-    return lista.concat(tentativasWiki(filme));
+    return lista.concat(tentativasWiki(filme, ctx));
   }
 
   function tentarEmSequencia(filme, lista, i) {
@@ -191,15 +227,15 @@
     }
     if (pendentes[filme.id]) return pendentes[filme.id];
 
-    var p = tentarEmSequencia(filme, candidatos(filme), 0).then(function (achado) {
+    var ctx = { instavel: false };
+    var p = tentarEmSequencia(filme, candidatos(filme, ctx), 0).then(function (achado) {
+      delete pendentes[filme.id];
       if (achado) {
         guardar(filme.id, { url: achado.url, fonte: achado.fonte, ts: agora() });
-        delete pendentes[filme.id];
         return { url: achado.url, fonte: achado.fonte, gerada: false };
       }
-      guardar(filme.id, { url: null, fonte: null, ts: agora() });
-      delete pendentes[filme.id];
-      return { url: cartazGerado(filme), fonte: "gerada", gerada: true };
+      guardar(filme.id, { url: null, fonte: null, ts: agora(), instavel: ctx.instavel });
+      return { url: cartazGerado(filme), fonte: "gerada", gerada: true, instavel: ctx.instavel };
     });
     pendentes[filme.id] = p;
     return p;

@@ -93,12 +93,24 @@
     saida.value = falhas.length
       ? falhas.map(function (f) { return f.id + "  —  " + f.titulo + " (" + f.ano + ")"; }).join("\n")
       : "Nenhuma falha. Todos os cartazes carregaram.";
+    if (falhas.length > total * 0.15) {
+      placar.insertAdjacentHTML("beforeend",
+        '<div style="grid-column:1/-1;border-color:var(--cortina);color:var(--texto)">' +
+        "<b style='font-size:.9rem'>Muita falha junta</b>" +
+        "<span>pode ser limite de pedidos da Wikipedia, e não falta de cartaz. " +
+        "Espere um minuto, clique em <b>Limpar cache e repetir</b> e compare.</span></div>");
+    }
   }
 
-  /* de 4 em 4 pra nao disparar 234 pedidos de uma vez */
+  /* Fila educada. A primeira versao disparava 4 pedidos de cada vez e a
+     Wikipedia cortou a partir do 170o filme (HTTP 429), fazendo parecer que
+     63 filmes nao tinham cartaz. Agora vai de dois em dois, com pausa entre
+     eles, e recua sozinha quando comeca a apanhar. */
   function rodar(filmes) {
     grade.innerHTML = ""; placar.innerHTML = ""; falhas = [];
     var i = 0, prontos = 0, emCurso = 0, total = filmes.length;
+    var seguidas = 0, pausa = 140;
+
     function proximo() {
       if (i >= total) { if (emCurso === 0) resumo(total); return; }
       var filme = filmes[i++]; emCurso++;
@@ -106,10 +118,18 @@
         cartao(filme, r);
         prontos++; emCurso--;
         barra.style.width = Math.round(prontos / total * 100) + "%";
-        proximo();
+        if (r.gerada) {
+          seguidas++;
+          /* tres falhas seguidas cheiram a bloqueio: respira antes de seguir */
+          if (seguidas >= 3) { pausa = Math.min(3000, pausa * 2); seguidas = 0; }
+        } else {
+          seguidas = 0;
+          pausa = Math.max(140, pausa * 0.8);
+        }
+        setTimeout(proximo, pausa);
       });
     }
-    for (var k = 0; k < 4; k++) proximo();
+    for (var k = 0; k < 2; k++) setTimeout(proximo, k * 200);
   }
 
   function marcar(id) {
