@@ -97,9 +97,14 @@ resolução de imagem do jogo e mostra, em vermelho, os filmes que não acharam
 cartaz. Dá pra testar só os 8 de hoje ou o acervo inteiro, e copiar a lista de
 falhas.
 
-> Atenção: esta conferência **precisa ser feita do seu navegador**. O ambiente
-> onde o jogo foi construído bloqueia o acesso à Wikipedia e ao TMDB, então a
-> cobertura real de imagens ainda não foi medida.
+Ela roda uma passada pelo acervo, espera 15 segundos e **repesca sozinha** o que
+falhou, até duas voltas — porque falha em sequência quase sempre é limite de
+pedidos da Wikipedia (HTTP 429), e não falta de cartaz. Só uma conferência roda
+por vez, de propósito: duas ao mesmo tempo dobram os pedidos e provocam
+justamente o bloqueio que a ferramenta deveria medir.
+
+> **Conferido em 22/09/2026: cobertura de 100%** — os 234 filmes acharam cartaz
+> pela Wikipedia, sem precisar de chave do TMDB.
 
 ### Consertando um cartaz
 
@@ -129,7 +134,9 @@ index.html                 a página do jogo
 config.js                  nome, links, data de início, sessões, imagens  ← mexa aqui
 css/estilo.css             visual inteiro; as cores da marca estão no topo
 assets/fontes/             Anton, Work Sans e IBM Plex Mono servidas pelo próprio site
-assets/logo-impulso.svg    (opcional) logotipo oficial — veja abaixo
+assets/logo-impulso.png    logotipo oficial da Impulso
+assets/og.jpg              arte que aparece quando o link é compartilhado
+assets/icone-180.png       ícone de tela de início no celular
 dados/filmes.js            o acervo: 234 filmes                            ← mexa aqui
 dados/piadas.js            os textos de marca ("A Impulso comenta")        ← mexa aqui
 js/util.js                 texto, sorteio estável, datas, armazenamento
@@ -141,10 +148,16 @@ ferramentas/diagnostico.html   conferência de cartazes
 
 ### O logotipo
 
-Enquanto não existir `assets/logo-impulso.svg`, o jogo remonta o lockup da
-Impulso com a própria tipografia da marca (IMPULSO em Anton âmbar, FILMES na
-vertical). **Basta soltar o arquivo oficial em `assets/logo-impulso.svg`**
-(ou `.png`) que ele passa a ser usado automaticamente, sem mexer em código.
+O arquivo oficial está em `assets/logo-impulso.png` e é usado no topo, no card
+de chamada e no rodapé. Para trocá-lo, basta substituir o arquivo (ou pôr um
+`assets/logo-impulso.svg`, que tem prioridade). Se os dois sumirem, o jogo
+remonta o lockup com a própria tipografia da marca e nada quebra.
+
+### A arte de compartilhamento
+
+`assets/og.jpg` é o que aparece quando alguém cola o link no WhatsApp, no
+LinkedIn ou no Slack. Se mudar o nome ou a chamada do jogo, vale refazer essa
+arte — as metatags que apontam para ela estão no topo do `index.html`.
 
 ### As fontes
 
