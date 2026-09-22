@@ -106,6 +106,47 @@
     $("voltar-hoje").onclick = function () { estado.dia = HOJE; telaSessoes(); };
   }
 
+  /* O ingresso e usado em dois lugares: na escolha do dia e no fim da sessao,
+     como chamada pra proxima. Por isso mora numa funcao. */
+  function ingressoHTML(s, i, dia) {
+    var d = U.dataDoDia(CFG.dataInicio, dia);
+    var st = situacao(dia, s.id);
+    var liberada = s.id === 1 || sessao2Liberada(dia);
+    var p = partidas[chave(dia, s.id)];
+    var carimbo = "";
+    if (st === "fim") carimbo = '<span class="carimbo ok">' + pontosDa(p) + "/16</span>";
+    else if (st === "andamento") carimbo = '<span class="carimbo andamento">em andamento</span>';
+    else if (!liberada) carimbo = '<span class="carimbo fechada">fechada</span>';
+
+    var recado = liberada
+      ? (st === "fim" ? "Sessão encerrada — dá pra rever o resultado." : s.abertura)
+      : (CFG.liberacaoSessao2 === "hora"
+        ? "Abre às " + CFG.liberaSessao2Hora + "h."
+        : "Abre quando você terminar a " + CFG.sessoes[0].nome + ".");
+
+    return '<button class="ingresso ' + (i === 0 ? "matine" : "meianoite") +
+      (carimbo ? " com-carimbo" : "") + '" data-sessao="' + s.id + '"' +
+      (liberada ? "" : " disabled") + ">" +
+      '<span class="furo cima"></span><span class="furo baixo"></span>' + carimbo +
+      '<span class="corpo">' +
+      '<span class="etiqueta">Impulso em Cartaz</span>' +
+      '<span class="nome">' + esc(s.nome) + "</span>" +
+      '<span class="recado">' + esc(recado) + "</span>" +
+      '<span class="rodape-ingresso"><span>Dia ' + dia + "</span>" +
+      "<span>" + esc(U.dataCurta(d)) + "</span><span>4 cartazes</span></span>" +
+      "</span>" +
+      '<span class="canhoto"><span class="serie">' + (i === 0 ? "01" : "02") + "</span>" +
+      '<span class="admite">admite<br>um</span></span>' +
+      "</button>";
+  }
+
+  /* liga o clique dos ingressos que estiverem dentro do elemento dado */
+  function ligarIngressos(onde) {
+    Array.prototype.forEach.call(onde.querySelectorAll(".ingresso"), function (b) {
+      b.onclick = function () { abrirSessao(estado.dia, +b.dataset.sessao); };
+    });
+  }
+
   function telaSessoes() {
     faixaArquivo();
     var d = U.dataDoDia(CFG.dataInicio, estado.dia);
@@ -122,35 +163,7 @@
       '<div class="lista-sessoes">';
 
     CFG.sessoes.forEach(function (s, i) {
-      var st = situacao(estado.dia, s.id);
-      var liberada = s.id === 1 || sessao2Liberada(estado.dia);
-      var p = partidas[chave(estado.dia, s.id)];
-      var carimbo = "";
-      if (st === "fim") carimbo = '<span class="carimbo ok">' + pontosDa(p) + "/16</span>";
-      else if (st === "andamento") carimbo = '<span class="carimbo andamento">em andamento</span>';
-      else if (!liberada) carimbo = '<span class="carimbo fechada">fechada</span>';
-
-      var recado = liberada
-        ? (st === "fim" ? "Sessão encerrada — dá pra rever o resultado." : s.abertura)
-        : (CFG.liberacaoSessao2 === "hora"
-          ? "Abre às " + CFG.liberaSessao2Hora + "h."
-          : "Abre quando você terminar a " + CFG.sessoes[0].nome + ".");
-
-      html +=
-        '<button class="ingresso ' + (i === 0 ? "matine" : "meianoite") +
-        (carimbo ? " com-carimbo" : "") + '" data-sessao="' + s.id + '"' +
-        (liberada ? "" : " disabled") + ">" +
-        '<span class="furo cima"></span><span class="furo baixo"></span>' + carimbo +
-        '<span class="corpo">' +
-        '<span class="etiqueta">Impulso em Cartaz</span>' +
-        '<span class="nome">' + esc(s.nome) + "</span>" +
-        '<span class="recado">' + esc(recado) + "</span>" +
-        '<span class="rodape-ingresso"><span>Dia ' + estado.dia + "</span>" +
-        "<span>" + esc(U.dataCurta(d)) + "</span><span>4 cartazes</span></span>" +
-        "</span>" +
-        '<span class="canhoto"><span class="serie">' + (i === 0 ? "01" : "02") + "</span>" +
-        '<span class="admite">admite<br>um</span></span>' +
-        "</button>";
+      html += ingressoHTML(s, i, estado.dia);
     });
 
     html += "</div>";
@@ -158,9 +171,7 @@
       html += chamadaImpulso();
     }
     $("tela-sessoes").innerHTML = html;
-    Array.prototype.forEach.call($("tela-sessoes").querySelectorAll(".ingresso"), function (b) {
-      b.onclick = function () { abrirSessao(estado.dia, +b.dataset.sessao); };
-    });
+    ligarIngressos($("tela-sessoes"));
     pintarLogos();
     ligarChamada();
     mostrar("sessoes");
@@ -648,9 +659,11 @@
     var max = p.itens.length * CFG.tentativasPorDesafio;
     var estrelas = Math.round(pontos / max * 4);
     var acertos = p.itens.filter(function (i) { return i.acertou; }).length;
-    var proxima = CFG.sessoes.filter(function (s) {
-      return s.id !== p.sessao && situacao(estado.dia, s.id) !== "fim";
-    })[0];
+    var indiceProxima = -1;
+    CFG.sessoes.forEach(function (s, i) {
+      if (s.id !== p.sessao && situacao(estado.dia, s.id) !== "fim") indiceProxima = i;
+    });
+    var proxima = indiceProxima >= 0 ? CFG.sessoes[indiceProxima] : null;
 
     var lista = p.itens.map(function (i) {
       var f = CAL.porId(i.id);
@@ -667,6 +680,10 @@
       '<div class="grade-resultado"><span>' + gradeEmoji(p) + "</span></div>" +
       '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(fechamento(pontos)) + "</div>" +
       '<ul class="resumo-lista">' + lista + "</ul>" +
+      (proxima
+        ? '<div class="proximo-ingresso"><p class="dica-titulo">Seu próximo ingresso</p>' +
+          ingressoHTML(proxima, indiceProxima, estado.dia) + "</div>"
+        : "") +
       '<button class="acao" id="btn-compartilhar" style="margin-top:22px">Compartilhar resultado</button>' +
       '<div class="desafio"><h3>Desafie alguém</h3>' +
       "<p>A gente escreve a mensagem, você só escolhe para quem.</p>" +
@@ -678,10 +695,6 @@
       '<div class="previa" id="desafio-previa"></div>' +
       '<button class="acao" id="btn-desafiar">Abrir no WhatsApp</button>' +
       '<button class="acao calma" id="btn-copiar-desafio" style="margin-top:8px">Copiar mensagem</button></div>' +
-      (proxima
-        ? '<button class="acao calma" id="btn-proxima-sessao" style="margin-top:22px">Ir para a ' +
-          esc(proxima.nome) + "</button>"
-        : "") +
       '<button class="acao calma" id="btn-voltar-sessoes" style="margin-top:8px">Voltar</button>' +
       "</div>" + chamadaImpulso();
 
@@ -689,7 +702,7 @@
       global.METRICAS.evento("compartilhou", "Compartilhou o resultado");
       compartilhar(p, this);
     };
-    if (proxima) $("btn-proxima-sessao").onclick = function () { abrirSessao(estado.dia, proxima.id); };
+    ligarIngressos($("tela-fim"));
     $("btn-voltar-sessoes").onclick = telaSessoes;
     montarDesafio(p);
     pintarLogos();

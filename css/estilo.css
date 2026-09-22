@@ -298,6 +298,18 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
 .resumo-lista li:last-child{border-bottom:0}
 .resumo-lista .ano{color:var(--apagado);font-size:.64rem}
 
+/* o proximo ingresso, no fim da sessao: e a acao mais provavel de quem
+   acabou de jogar, entao aparece logo depois do placar e com o mesmo peso
+   visual do ingresso da abertura, em vez de um botao apagado no rodape */
+.proximo-ingresso{margin-top:26px}
+.proximo-ingresso .dica-titulo{margin-bottom:10px;text-align:center}
+.proximo-ingresso .ingresso{animation:chamar 2.6s ease-in-out 1.2s 2}
+@keyframes chamar{
+  0%,100%{transform:none}
+  40%{transform:translateY(-4px) rotate(-.5deg)}
+}
+@media (prefers-reduced-motion:reduce){.proximo-ingresso .ingresso{animation:none}}
+
 /* ---------- desafiar alguem ---------- */
 .desafio{margin-top:26px}
 .desafio h3{font-size:1.5rem;margin-bottom:4px}
