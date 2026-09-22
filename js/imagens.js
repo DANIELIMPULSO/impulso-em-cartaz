@@ -83,7 +83,34 @@
 
   /* ---------- Wikipedia (padrao, sem chave) ---------- */
 
-  function paginaComImagem(dados) {
+  /* Cartaz de cinema e sempre em pe. Foto de cena, logotipo de estudio e
+     retrato de diretor — que e o que a Wikipedia as vezes poe como imagem
+     principal do verbete — costumam ser quadrados ou deitados. */
+  function emPe(p) {
+    var t = p.thumbnail;
+    if (!t || !t.width || !t.height) return true;
+    return t.height / t.width >= 1.15;
+  }
+
+  /* Numa busca, o primeiro resultado pode ser outro verbete ("lista de filmes
+     de...", a obra que inspirou, o remake). Exige que o titulo da pagina tenha
+     ao menos uma palavra forte do filme procurado. */
+  function tituloBate(p, palavras) {
+    if (!palavras || !palavras.length) return true;
+    var t = global.U.normalizar(p.title || "");
+    for (var i = 0; i < palavras.length; i++) {
+      if (t.indexOf(palavras[i]) >= 0) return true;
+    }
+    return false;
+  }
+
+  function palavrasFortes(texto) {
+    return global.U.normalizar(texto).split(" ").filter(function (w) {
+      return w.length >= 4;
+    });
+  }
+
+  function paginaComImagem(dados, exig) {
     var paginas = dados && dados.query && dados.query.pages;
     if (!paginas) return null;
     /* numa busca, a ordem vem no campo "index" — sem isso o navegador
@@ -92,31 +119,39 @@
     lista.sort(function (a, b) {
       return (a.index == null ? 99 : a.index) - (b.index == null ? 99 : b.index);
     });
+    exig = exig || {};
     for (var i = 0; i < lista.length; i++) {
       var p = lista[i];
-      if (p && p.thumbnail && p.thumbnail.source) {
-        var origem = p.original && p.original.source;
-        /* imagens muito grandes pesam no celular: so uso a original se for
-           de tamanho razoavel */
-        if (origem && p.original.width && p.original.width <= 1600) return origem;
-        return p.thumbnail.source;
-      }
+      if (!p || !p.thumbnail || !p.thumbnail.source) continue;
+      if (!tituloBate(p, exig.palavras)) continue;
+      if (exig.emPe && !emPe(p)) continue;
+      var origem = p.original && p.original.source;
+      /* imagens muito grandes pesam no celular: so uso a original se for
+         de tamanho razoavel */
+      if (origem && p.original.width && p.original.width <= 1600) return origem;
+      return p.thumbnail.source;
     }
     return null;
   }
 
-  function wikiPorTitulo(lang, titulo, ctx) {
+  function wikiPorTitulo(lang, titulo, ctx, exig) {
     var url = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json" +
       "&origin=*&redirects=1&prop=pageimages&piprop=original%7Cthumbnail&pithumbsize=720" +
       "&titles=" + encodeURIComponent(titulo);
-    return jsonTeimoso(url, ctx).then(paginaComImagem);
+    return jsonTeimoso(url, ctx).then(function (d) {
+      /* verbete pedido pelo titulo exato: nao precisa conferir o nome da
+         pagina, so o formato da imagem */
+      return paginaComImagem(d, { emPe: exig && exig.emPe });
+    });
   }
 
-  function wikiPorBusca(lang, termo, ctx) {
+  function wikiPorBusca(lang, termo, ctx, exig) {
     var url = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json" +
       "&origin=*&prop=pageimages&piprop=original%7Cthumbnail&pithumbsize=720" +
       "&generator=search&gsrlimit=3&gsrsearch=" + encodeURIComponent(termo);
-    return jsonTeimoso(url, ctx).then(paginaComImagem);
+    return jsonTeimoso(url, ctx).then(function (d) {
+      return paginaComImagem(d, exig);
+    });
   }
 
   function tentativasWiki(filme, ctx) {
@@ -124,13 +159,26 @@
     var lista = [];
     idiomas.forEach(function (lang) {
       var titulo = filme.wiki && filme.wiki[lang];
-      if (titulo) lista.push({ fonte: "wikipedia:" + lang, buscar: wikiPorTitulo.bind(null, lang, titulo, ctx) });
+      if (titulo) {
+        lista.push({
+          fonte: "wikipedia:" + lang,
+          buscar: function (exig) { return wikiPorTitulo(lang, titulo, ctx, exig); }
+        });
+      }
     });
     idiomas.forEach(function (lang) {
       var termo = (lang === "pt")
         ? filme.titulo + " filme " + filme.ano
         : (filme.original || filme.titulo) + " " + filme.ano + " film";
-      lista.push({ fonte: "wikipedia:" + lang + ":busca", buscar: wikiPorBusca.bind(null, lang, termo, ctx) });
+      lista.push({
+        fonte: "wikipedia:" + lang + ":busca",
+        buscar: function (exig) {
+          return wikiPorBusca(lang, termo, ctx, {
+            emPe: exig && exig.emPe,
+            palavras: palavrasFortes(lang === "pt" ? filme.titulo : (filme.original || filme.titulo))
+          });
+        }
+      });
     });
     return lista;
   }
@@ -204,18 +252,18 @@
     return lista.concat(tentativasWiki(filme, ctx));
   }
 
-  function tentarEmSequencia(filme, lista, i) {
+  function tentarEmSequencia(filme, lista, i, exig) {
     if (i >= lista.length) return Promise.resolve(null);
     var passo = lista[i];
     return Promise.resolve()
-      .then(passo.buscar)
+      .then(function () { return passo.buscar(exig); })
       .then(function (url) {
         if (!url) throw new Error("vazio");
         return carregar(url).then(function () {
           return { url: url, fonte: passo.fonte };
         });
       })
-      .catch(function () { return tentarEmSequencia(filme, lista, i + 1); });
+      .catch(function () { return tentarEmSequencia(filme, lista, i + 1, exig); });
   }
 
   /* devolve sempre um objeto { url, fonte, gerada } — nunca rejeita */
@@ -228,7 +276,15 @@
     if (pendentes[filme.id]) return pendentes[filme.id];
 
     var ctx = { instavel: false };
-    var p = tentarEmSequencia(filme, candidatos(filme, ctx), 0).then(function (achado) {
+    /* Duas passadas: a primeira so aceita imagem em pe, que e o formato de
+       cartaz; se nenhuma fonte tiver cartaz, a segunda aceita o que houver,
+       porque uma foto de cena ainda e melhor que cartaz nenhum. */
+    var lista = candidatos(filme, ctx);
+    var p = tentarEmSequencia(filme, lista, 0, { emPe: true })
+      .then(function (achado) {
+        return achado || tentarEmSequencia(filme, lista, 0, { emPe: false });
+      })
+      .then(function (achado) {
       delete pendentes[filme.id];
       if (achado) {
         guardar(filme.id, { url: achado.url, fonte: achado.fonte, ts: agora() });
@@ -236,7 +292,7 @@
       }
       guardar(filme.id, { url: null, fonte: null, ts: agora(), instavel: ctx.instavel });
       return { url: cartazGerado(filme), fonte: "gerada", gerada: true, instavel: ctx.instavel };
-    });
+      });
     pendentes[filme.id] = p;
     return p;
   }

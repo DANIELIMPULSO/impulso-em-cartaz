@@ -309,8 +309,8 @@
      os pixels de volta; exibir, que e o que interessa aqui, continua valendo.
      Por isso nao se pede crossOrigin: pedir CORS numa imagem que ja esta em
      cache sem CORS faria o navegador recusar a imagem inteira. */
-  function recorteCobrindo(img, proporcao, fatia) {
-    var lf = img.naturalWidth, af = img.naturalHeight * (fatia || 1);
+  function recorteCobrindo(img, proporcao) {
+    var lf = img.naturalWidth, af = img.naturalHeight;
     var pf = lf / af;
     if (pf > proporcao) {                 /* sobra largura: corta dos lados */
       var l = af * proporcao;
@@ -320,7 +320,7 @@
     return [0, (af - a) / 2, lf, a];
   }
 
-  function quadricular(moldura, img, blocos, fatia) {
+  function quadricular(moldura, img, blocos) {
     /* a proporcao vem do quadro como ele esta na tela, e nao de um valor fixo:
        no celular a moldura fica quase quadrada por causa do limite de altura,
        e um canvas 2:3 seria recortado de novo pelo object-fit, deixando o
@@ -332,7 +332,7 @@
     tela.width = Math.max(4, blocos);
     tela.height = Math.max(4, Math.round(blocos / proporcao));
     var pincel = tela.getContext("2d");
-    var r = recorteCobrindo(img, proporcao, fatia);
+    var r = recorteCobrindo(img, proporcao);
     pincel.drawImage(img, r[0], r[1], r[2], r[3], 0, 0, tela.width, tela.height);
     moldura.innerHTML = "";
     moldura.appendChild(tela);
@@ -350,10 +350,8 @@
           moldura.innerHTML = "";
           moldura.appendChild(img);
         } else {
-          var escada = CFG.blocosPorEtapa || [14, 24, 40, 90];
-          var fatias = CFG.recortePorEtapa || [1, 1, 1, 1];
-          var n = Math.min(etapa, escada.length - 1);
-          quadricular(moldura, img, escada[n], fatias[Math.min(n, fatias.length - 1)]);
+          var escada = CFG.blocosPorEtapa || [14, 22, 28, 90];
+          quadricular(moldura, img, escada[Math.min(etapa, escada.length - 1)]);
         }
         if (r.gerada) {
           var et = document.createElement("span");
@@ -840,8 +838,7 @@
       "<p>Todo dia o " + CFG.nome + " abre <b>duas sessões</b> de <b>quatro cartazes</b> cada. " +
       "A imagem começa desfocada e ampliada; a cada erro ela clareia e aparece uma dica nova.</p>" +
       "<ul>" +
-      "<li>O cartaz aparece <b>quadriculado</b> e ganha definição a cada erro. Até a " +
-      "última tentativa ele entra sem a faixa de baixo, onde costuma ficar o título escrito.</li>" +
+      "<li>O cartaz aparece <b>quadriculado</b> e ganha definição a cada erro.</li>" +
       "<li>Você tem <b>4 tentativas</b> por cartaz. Acertar de primeira vale 4 pontos, depois 3, 2 e 1.</li>" +
 
       "<li>Pode digitar o título em português ou o original — o campo sugere enquanto você escreve.</li>" +

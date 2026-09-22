@@ -14,15 +14,15 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
 - **4 tentativas** por cartaz. Acertar de primeira vale 4 pontos; depois 3, 2 e 1.
   Cada sessão vale até **16 pontos**.
 - O cartaz aparece quadriculado: 14 quadradinhos de largura na primeira
-  tentativa, depois 24, 40 e 90 (`blocosPorEtapa`, no `config.js`). A primeira
+  tentativa, depois 22, 28 e 90 (`blocosPorEtapa`, no `config.js`). A primeira
   versão usava desfoque e foi trocada — desfoque forte apaga até a composição e
   não dá chance nenhuma, enquanto o mosaico preserva massa de cor, recorte de
   figura e diagramação, que é do que o cinéfilo precisa para arriscar.
-- Até a última tentativa o cartaz entra **sem a faixa de baixo**
-  (`recortePorEtapa`): é onde quase todo pôster escreve o título, e com 40
-  quadradinhos dava para ler. A alternativa seria borrar, mas aí a imagem volta
-  a parecer desfoque. No último cartaz o pôster inteiro aparece — é quando deve
-  ficar fácil.
+- O pôster tem o título escrito nele, então a terceira etapa é conservadora (28
+  quadradinhos) e o salto para 90 fica só na última tentativa, que é quando deve
+  ficar fácil. Foram testadas e descartadas duas alternativas: borrar por cima
+  (a imagem volta a parecer desfoque) e cortar a faixa de baixo do pôster (fica
+  feio e nem sempre é ali que o título está).
 - A cada erro a imagem ganha definição e entra uma dica nova:
 
   | Momento | O que aparece |
@@ -104,6 +104,13 @@ resolvida no navegador de quem joga, nesta ordem:
    em inglês, e por fim uma busca;
 5. um **cartaz tipográfico** gerado na hora — assim nunca fica buraco na tela.
 
+A resolução passa duas vezes pela lista: na primeira só aceita imagem **em pé**,
+que é o formato de cartaz, o que descarta foto de cena, logotipo de estúdio e
+retrato de diretor — coisas que a Wikipedia às vezes usa como imagem principal
+do verbete. Só se nenhuma fonte tiver cartaz é que a segunda passada aceita o
+que houver. Nas buscas, o resultado ainda precisa ter uma palavra forte do
+título no nome da página, para não cair num verbete vizinho.
+
 O resultado fica em cache no aparelho de quem joga por 30 dias.
 
 ### Conferindo antes de divulgar
@@ -112,6 +119,11 @@ Abra **`ferramentas/diagnostico.html`** no seu navegador. Ela roda a mesma
 resolução de imagem do jogo e mostra, em vermelho, os filmes que não acharam
 cartaz. Dá pra testar só os 8 de hoje ou o acervo inteiro, e copiar a lista de
 falhas.
+
+Ela também tem um botão **"cartaz errado"** em cada filme: a conferência
+automática só sabe dizer se *achou* imagem, mas se a imagem é mesmo o pôster
+oficial daquele filme, só olho humano resolve. As marcações ficam salvas no
+navegador e saem numa lista pronta para copiar.
 
 Ela roda uma passada pelo acervo, espera 15 segundos e **repesca sozinha** o que
 falhou, até duas voltas — porque falha em sequência quase sempre é limite de

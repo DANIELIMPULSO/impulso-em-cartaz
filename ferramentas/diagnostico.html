@@ -20,7 +20,13 @@
   .item.falhou{border-color:var(--cortina)}
   .item img{width:100%;height:170px;object-fit:cover;display:block;background:#000}
   .item .txt{padding:6px 8px}
-  .item .fonte{color:var(--texto-fraco);font-size:.64rem;word-break:break-all}
+  .item .fonte{color:var(--texto-fraco);font-size:.64rem;word-break:break-all;margin-bottom:6px}
+  .item.marcado{border-color:var(--impulso);box-shadow:0 0 0 1px var(--impulso)}
+  .item .marcar{width:100%;border:1px solid var(--linha);background:transparent;color:var(--texto-fraco);
+    border-radius:6px;padding:4px;font-size:.62rem;font-family:var(--fonte-mono);text-transform:uppercase;
+    letter-spacing:.08em;cursor:pointer}
+  .item .marcar:hover{border-color:var(--cortina);color:var(--cortina)}
+  .item.marcado .marcar{border-color:var(--impulso);color:var(--impulso)}
   .progresso{height:4px;background:var(--linha);border-radius:2px;overflow:hidden;margin-bottom:12px}
   .progresso i{display:block;height:100%;background:var(--impulso);width:0;transition:width .2s}
   textarea{width:100%;height:150px;background:var(--papel);color:var(--texto);border:1px solid var(--linha);border-radius:10px;padding:10px;font-family:monospace;font-size:.75rem}
@@ -45,6 +51,21 @@
   <div class="progresso"><i id="barra"></i></div>
   <div class="placar-diag" id="placar"></div>
   <div class="grade" id="grade"></div>
+
+  <section style="margin:24px 0;background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:16px">
+    <h2 style="font-family:var(--fonte-titulo);font-weight:400;letter-spacing:.04em;font-size:1.2rem;margin:0 0 6px">
+      CARTAZES ERRADOS</h2>
+    <p style="color:var(--texto-fraco);font-size:.85rem;margin:0 0 10px">
+      A conferência automática só sabe dizer se <b>achou</b> imagem. Se a imagem é mesmo o
+      pôster oficial daquele filme, só olho humano resolve — role a lista e clique em
+      <b>cartaz errado</b> nos que não forem. A marcação fica salva neste navegador.
+    </p>
+    <textarea id="marcados" style="height:120px"></textarea>
+    <div class="barra" style="margin-top:8px">
+      <button id="b-copiar-marcados">Copiar marcados</button>
+      <button id="b-limpar-marcados">Limpar marcações</button>
+    </div>
+  </section>
 
   <details style="margin:20px 0">
     <summary style="cursor:pointer;color:var(--impulso)">Como consertar um cartaz que falhou</summary>
@@ -73,6 +94,9 @@
 
   let falhas = [];
   let cartoes = {};
+  const CHAVE_MARCADOS = "cartaz.v1.marcados";
+  let marcados = {};
+  try { marcados = JSON.parse(localStorage.getItem(CHAVE_MARCADOS)) || {}; } catch (e) { marcados = {}; }
   let execucao = 0;   // duas conferencias ao mesmo tempo dobram os pedidos e
                       // fazem a Wikipedia cortar: so uma roda por vez
 
@@ -86,11 +110,33 @@
       cartoes[filme.id] = d;
       grade.appendChild(d);
     }
-    d.className = "item" + (ok ? "" : " falhou");
+    d.className = "item" + (ok ? "" : " falhou") + (marcados[filme.id] ? " marcado" : "");
     d.innerHTML =
       '<img loading="lazy" src="' + r.url + '" alt="">' +
       '<div class="txt"><b>' + filme.titulo + "</b> (" + filme.ano + ")" +
-      '<div class="fonte">' + (ok ? r.fonte : "NENHUMA IMAGEM") + "</div></div>";
+      '<div class="fonte">' + (ok ? r.fonte : "NENHUMA IMAGEM") + "</div>" +
+      '<button class="marcar">' + (marcados[filme.id] ? "✓ marcado" : "cartaz errado") + "</button>" +
+      "</div>";
+    d.querySelector(".marcar").onclick = function () {
+      if (marcados[filme.id]) delete marcados[filme.id];
+      else marcados[filme.id] = filme.titulo + " (" + filme.ano + ")";
+      localStorage.setItem(CHAVE_MARCADOS, JSON.stringify(marcados));
+      cartao(filme, r);
+      listarMarcados();
+    };
+  }
+
+  /* A conferencia automatica so sabe dizer se ACHOU imagem; se a imagem e
+     mesmo o cartaz oficial daquele filme, so olho humano resolve. Daí o botao:
+     você marca os errados enquanto rola a lista e manda a lista pronta. */
+  function listarMarcados() {
+    var ids = Object.keys(marcados);
+    var caixa = document.getElementById("marcados");
+    if (!ids.length) {
+      caixa.value = "Nenhum cartaz marcado. Clique em \"cartaz errado\" nos que não forem o pôster oficial.";
+      return;
+    }
+    caixa.value = ids.map(function (id) { return id + "  —  " + marcados[id]; }).join("\n");
   }
 
   function resumo(total, aviso) {
@@ -190,6 +236,20 @@
     setTimeout(function () { b.textContent = "Copiar lista de falhas"; }, 1500);
   };
 
+  document.getElementById("b-copiar-marcados").onclick = function () {
+    navigator.clipboard && navigator.clipboard.writeText(document.getElementById("marcados").value);
+    this.textContent = "Copiado!";
+    const b = this;
+    setTimeout(function () { b.textContent = "Copiar marcados"; }, 1500);
+  };
+  document.getElementById("b-limpar-marcados").onclick = function () {
+    marcados = {};
+    localStorage.removeItem(CHAVE_MARCADOS);
+    listarMarcados();
+    rodar(document.getElementById("b-tudo").classList.contains("ativo") ? CAL.acervo : doDia());
+  };
+
+  listarMarcados();
   rodar(doDia());
 })();
 </script>
