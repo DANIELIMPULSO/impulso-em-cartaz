@@ -23,10 +23,6 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
   quadradinhos dava para ler. A alternativa seria borrar, mas aí a imagem volta
   a parecer desfoque. No último cartaz o pôster inteiro aparece — é quando deve
   ficar fácil.
-- **Cada erro devolve informação**: o palpite volta comparado com o filme do dia
-  em gênero, país, ano e direção — verde igual, amarelo perto, vermelho longe,
-  com seta indicando se o filme do dia é mais recente ou mais antigo. As regras
-  de proximidade estão em `js/comparar.js`.
 - A cada erro a imagem ganha definição e entra uma dica nova:
 
   | Momento | O que aparece |
@@ -165,7 +161,6 @@ dados/filmes.js            o acervo: 234 filmes                            ← m
 dados/piadas.js            os textos de marca ("A Impulso comenta")        ← mexa aqui
 js/util.js                 texto, sorteio estável, datas, armazenamento
 js/calendario.js           qual filme cai em que dia
-js/comparar.js             regras do quadro de palpites (o que é "perto")
 js/imagens.js              resolução e cache de cartazes
 js/jogo.js                 motor, telas e arquivo de partidas
 ferramentas/diagnostico.html   conferência de cartazes
