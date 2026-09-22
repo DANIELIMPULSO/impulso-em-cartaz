@@ -14,9 +14,6 @@
   var HOJE = CAL.hoje();
   var estado = { dia: HOJE, sessao: null, marcada: -1, sugestoes: [] };
 
-  var DESFOQUE = [26, 15, 8, 3];
-  var ZOOM     = [2.1, 1.7, 1.35, 1.12];
-  var CINZA    = [1, 1, .55, .2];
   var EMOJI    = ["🟩", "🟨", "🟧", "🟥"]; /* verde, amarelo, laranja, vermelho */
   var EMOJI_ERRO = "⬛";
 
@@ -264,32 +261,75 @@
     if (proximo) IMG.precarregar([CAL.porId(proximo.id)]);
   }
 
+  /* Desenha o cartaz quadriculado.
+     O truque: a imagem e desenhada num canvas minusculo (14 pixels de largura
+     na primeira tentativa) e o navegador amplia esse canvas sem suavizar, com
+     image-rendering: pixelated. Cada pixel vira um quadradinho solido.
+     Feito em canvas, e nao em CSS, porque assim o numero de quadradinhos nao
+     depende da densidade de tela do aparelho — no celular retina, um mosaico
+     feito por CSS sairia com o dobro ou o triplo de blocos e o jogo ficaria
+     mais facil justamente pra quem tem tela melhor.
+     Desenhar imagem de outro dominio "suja" o canvas, o que so impediria ler
+     os pixels de volta; exibir, que e o que interessa aqui, continua valendo.
+     Por isso nao se pede crossOrigin: pedir CORS numa imagem que ja esta em
+     cache sem CORS faria o navegador recusar a imagem inteira. */
+  function recorteCobrindo(img, proporcao) {
+    var lf = img.naturalWidth, af = img.naturalHeight;
+    var pf = lf / af;
+    if (pf > proporcao) {                 /* sobra largura: corta dos lados */
+      var l = af * proporcao;
+      return [(lf - l) / 2, 0, l, af];
+    }
+    var a = lf / proporcao;               /* sobra altura: corta em cima e embaixo */
+    return [0, (af - a) / 2, lf, a];
+  }
+
+  function quadricular(moldura, img, blocos) {
+    /* a proporcao vem do quadro como ele esta na tela, e nao de um valor fixo:
+       no celular a moldura fica quase quadrada por causa do limite de altura,
+       e um canvas 2:3 seria recortado de novo pelo object-fit, deixando o
+       quadradinho retangular e a conta de blocos errada */
+    var proporcao = (moldura.clientWidth && moldura.clientHeight)
+      ? moldura.clientWidth / moldura.clientHeight
+      : 2 / 3;
+    var tela = document.createElement("canvas");
+    tela.width = Math.max(4, blocos);
+    tela.height = Math.max(4, Math.round(blocos / proporcao));
+    var pincel = tela.getContext("2d");
+    var r = recorteCobrindo(img, proporcao);
+    pincel.drawImage(img, r[0], r[1], r[2], r[3], 0, 0, tela.width, tela.height);
+    moldura.innerHTML = "";
+    moldura.appendChild(tela);
+  }
+
   function montarImagem(moldura, filme, etapa, revelar) {
     IMG.resolver(filme).then(function (r) {
       if (!moldura.isConnected) return;
       var img = new Image();
-      img.alt = revelar ? esc(filme.titulo) : "Cartaz desfocado do filme do desafio";
+      img.alt = revelar ? esc(filme.titulo) : "Cartaz quadriculado do filme do desafio";
       img.referrerPolicy = "no-referrer";
       img.onload = function () {
-        if (img.naturalWidth / img.naturalHeight > 1.2) moldura.classList.add("larga");
-        else moldura.classList.remove("larga");
+        moldura.classList.toggle("larga", img.naturalWidth / img.naturalHeight > 1.2);
+        if (revelar) {
+          moldura.innerHTML = "";
+          moldura.appendChild(img);
+        } else {
+          var escada = CFG.blocosPorEtapa || [14, 24, 44, 90];
+          quadricular(moldura, img, escada[Math.min(etapa, escada.length - 1)]);
+        }
+        if (r.gerada) {
+          var et = document.createElement("span");
+          et.className = "etiqueta-imagem";
+          et.textContent = "cartaz indisponível";
+          moldura.appendChild(et);
+        }
+      };
+      /* a imagem ja foi validada pelo resolvedor, entao aqui so resta o caso
+         raro de ela sumir do ar entre um passo e outro */
+      img.onerror = function () {
+        moldura.innerHTML = '<div class="carregando">cartaz indisponível</div>';
       };
       img.src = r.url;
-      var escala = Math.max(0.65, moldura.clientWidth / 400);
-      var h = U.hash(filme.id);
-      var foco = (25 + (h % 50)) + "% " + (25 + ((h >> 5) % 50)) + "%";
-      img.style.setProperty("--foco", foco);
-      img.style.setProperty("--desfoque", (revelar ? 0 : DESFOQUE[etapa] * escala) + "px");
-      img.style.setProperty("--zoom", revelar ? 1 : ZOOM[etapa]);
-      img.style.setProperty("--cinza", revelar ? 0 : CINZA[etapa]);
-      moldura.innerHTML = "";
-      moldura.appendChild(img);
-      if (r.gerada) {
-        var et = document.createElement("span");
-        et.className = "etiqueta-imagem";
-        et.textContent = "cartaz indisponível";
-        moldura.appendChild(et);
-      }
     });
   }
 

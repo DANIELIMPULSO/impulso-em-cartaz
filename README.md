@@ -13,7 +13,12 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
 
 - **4 tentativas** por cartaz. Acertar de primeira vale 4 pontos; depois 3, 2 e 1.
   Cada sessão vale até **16 pontos**.
-- A cada erro a imagem clareia e entra uma dica nova:
+- O cartaz aparece quadriculado: 14 quadradinhos de largura na primeira
+  tentativa, depois 24, 44 e 90 (`blocosPorEtapa`, no `config.js`). A primeira
+  versão usava desfoque e foi trocada — desfoque forte apaga até a composição e
+  não dá chance nenhuma, enquanto o mosaico preserva massa de cor, recorte de
+  figura e diagramação, que é do que o cinéfilo precisa para arriscar.
+- A cada erro a imagem ganha definição e entra uma dica nova:
 
   | Momento | O que aparece |
   |---|---|

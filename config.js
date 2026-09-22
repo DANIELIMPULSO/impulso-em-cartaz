@@ -22,6 +22,11 @@ window.CARTAZ_CONFIG = {
   /* --- partida --- */
   desafiosPorSessao: 4,
   tentativasPorDesafio: 4,
+  /* Quantos quadradinhos de largura o cartaz tem em cada etapa, da primeira
+     tentativa ate a ultima. Numero menor = mais dificil. Desfoque escondia
+     ate a composicao e nao dava chance; o mosaico deixa massa de cor, recorte
+     de figura e diagramacao aparecerem, que e do que o cinefilo precisa. */
+  blocosPorEtapa: [14, 24, 44, 90],
   sessoes: [
     { id: 1, nome: "Matinê",             abertura: "Quatro cartazes pra começar o dia." },
     { id: 2, nome: "Sessão da Meia-Noite", abertura: "Mais quatro, e agora sem dó." }
