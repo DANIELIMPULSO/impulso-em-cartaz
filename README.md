@@ -143,7 +143,11 @@ desafios cair como still em vez de cartaz.
 ```
 index.html                 a página do jogo
 config.js                  nome, links, data de início, sessões, imagens  ← mexa aqui
-css/estilo.css             visual inteiro; as cores da marca estão no topo
+css/estilo.css             visual inteiro; as cores da marca estão no topo.
+                           Direção "Sala Escura": separa por espaço, não por
+                           borda, e só a ação principal tem cor. No desktop o
+                           jogo vira duas colunas (cartaz à esquerda, comandos
+                           à direita), em vez de coluna estreita de celular.
 assets/fontes/             Anton, Work Sans e IBM Plex Mono servidas pelo próprio site
 assets/logo-impulso.png    logotipo oficial da Impulso
 assets/og.jpg              arte que aparece quando o link é compartilhado

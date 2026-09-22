@@ -110,10 +110,11 @@
     faixaArquivo();
     var d = U.dataDoDia(CFG.dataInicio, estado.dia);
     var html =
-      '<div class="cartao"><h2>Dia ' + estado.dia + "</h2>" +
-      '<p style="color:var(--impulso);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px">' +
-      U.dataPorExtenso(d) + "</p>" +
-      "<p>Oito cartazes desfocados, em duas sessões. Quatro tentativas em cada um — e a imagem vai clareando a cada erro.</p></div>";
+      '<div class="abertura"><h1>Em Cartaz</h1>' +
+      '<p class="data">Dia ' + estado.dia + " · " + U.dataPorExtenso(d) + "</p>" +
+      "<p>Oito cartazes quadriculados, em duas sessões. Quatro tentativas em cada um — " +
+      "e a imagem ganha definição a cada erro.</p></div>" +
+      '<div class="lista-sessoes">';
 
     CFG.sessoes.forEach(function (s) {
       var st = situacao(estado.dia, s.id);
@@ -135,6 +136,7 @@
         "<h3>" + esc(s.nome) + "</h3><small>" + esc(recado) + "</small></span>" + selo + "</span></button>";
     });
 
+    html += "</div>";
     if (situacao(estado.dia, 1) === "fim" && situacao(estado.dia, 2) === "fim") {
       html += chamadaImpulso();
     }
@@ -196,10 +198,10 @@
   }
 
   function chamadaImpulso() {
-    return '<div class="chamada"><div class="regua"></div><div class="miolo">' +
+    return '<div class="chamada">' +
       logotipo() + "<h3>" + esc(CFG.chamada.titulo) + "</h3><p>" +
       esc(CFG.chamada.texto) + '</p><a class="cta" href="' + CFG.site + '" target="_blank" rel="noopener">' +
-      esc(CFG.chamada.botao) + "</a></div></div>";
+      esc(CFG.chamada.botao) + "</a></div>";
   }
 
   /* ================= tela: desafio ================= */
@@ -229,26 +231,31 @@
     var ctx = itemAtual(), p = ctx.p, item = ctx.item, filme = ctx.filme;
     var nome = CFG.sessoes.filter(function (s) { return s.id === estado.sessao; })[0].nome;
     var passos = p.itens.map(function (i, n) {
-      var c = "passo";
-      if (i.fim) c += i.acertou ? " feito" : " errado";
-      if (n === p.atual) c += " atual";
-      return '<span class="' + c + '"></span>';
+      var c = "";
+      if (i.fim) c = i.acertou ? "ok" : "errou";
+      if (n === p.atual) c = "agora";
+      return "<i" + (c ? ' class="' + c + '"' : "") + "></i>";
     }).join("");
 
     $("tela-jogo").innerHTML =
-      '<div class="cabecalho-jogo">' +
-      '<span class="titulo">Dia ' + estado.dia + " · <b>" + esc(nome) + "</b> · " +
-      (p.atual + 1) + " de " + p.itens.length + "</span>" +
-      '<span class="passos">' + passos + "</span></div>" +
-      '<div class="moldura" id="moldura"><div class="carregando">revelando…</div></div>' +
+      '<div class="jogo-grade">' +
+      '<div class="jogo-esq">' +
+      '<div class="moldura" id="moldura"><div class="carregando">carregando…</div></div>' +
+      "</div>" +
+      '<div class="jogo-dir">' +
+      '<div class="cabeca"><h1>' + esc(nome) + " <i>·</i> " +
+      (p.atual + 1) + " de " + p.itens.length + "</h1>" +
+      '<span class="trilha">' + passos + "</span></div>" +
+      '<div class="dica-titulo">O que já sabemos</div>' +
       '<div class="dicas" id="dicas"></div>' +
       '<div class="palpite"><input id="entrada" type="text" autocomplete="off" autocapitalize="off" ' +
       'spellcheck="false" placeholder="Que filme é esse?" aria-label="Seu palpite">' +
       '<div class="sugestoes oculto" id="sugestoes"></div></div>' +
-      '<div class="botoes"><button class="botao" id="btn-chutar">Chutar</button>' +
-      '<button class="botao secundario" id="btn-pular">Desisto</button></div>' +
-      '<div class="tentativas" id="tentativas"></div>' +
-      '<div id="ultimo-erro"></div>';
+      '<button class="acao" id="btn-chutar">Chutar</button>' +
+      '<div class="rodape-acao"><span class="tentativas" id="tentativas"></span>' +
+      '<button class="desisto" id="btn-pular">desisto desta</button></div>' +
+      '<div id="ultimo-erro"></div>' +
+      "</div></div>";
 
     montarImagem($("moldura"), filme, item.erros.length);
     montarDicas(filme, item.erros.length);
@@ -336,18 +343,21 @@
   function montarDicas(filme, etapa, tudo) {
     var linhas = [["Gênero", NOMES_CATEGORIA[filme.categoria] || filme.categoria]];
     if (etapa >= 1 || tudo) linhas.push(["Origem", filme.pais + " · anos " + (Math.floor(filme.ano / 10) * 10)]);
-    if (etapa >= 2 || tudo) linhas.push(["Sinal de fumaça", filme.dica]);
+    if (etapa >= 2 || tudo) linhas.push(["Sinal", filme.dica]);
     if (etapa >= 3 || tudo) linhas.push(["Ficha", "Direção de " + filme.diretor + " · com " + filme.elenco]);
     $("dicas").innerHTML = linhas.map(function (l) {
-      return '<div class="dica"><b>' + esc(l[0]) + "</b><span>" + esc(l[1]) + "</span></div>";
+      var longa = String(l[1]).length > 34 ? " longa" : "";
+      return '<div class="dica' + longa + '"><b>' + esc(l[0]) + "</b><span>" + esc(l[1]) + "</span></div>";
     }).join("");
   }
 
   function montarTentativas(item) {
-    var restam = CFG.tentativasPorDesafio - item.erros.length;
-    $("tentativas").textContent = restam === 1
-      ? "última tentativa"
-      : restam + " tentativas restantes";
+    var total = CFG.tentativasPorDesafio, gastas = item.erros.length;
+    var marcas = "";
+    for (var i = 0; i < total; i++) marcas += "<i" + (i < gastas ? ' class="gasta"' : "") + "></i>";
+    var t = $("tentativas");
+    t.innerHTML = marcas;
+    t.title = (total - gastas) + " de " + total + " tentativas restantes";
   }
 
   /* ---------- autocomplete ---------- */
@@ -482,9 +492,10 @@
       : '<div class="resultado-tarja erro">' + (item.pulou ? "Passou a vez" : "Acabaram as tentativas") + "</div>";
 
     $("tela-revelacao").innerHTML =
-      tarja +
-      '<div class="moldura" id="moldura-revelada"></div>' +
-      '<div class="cartao ficha">' +
+      '<div class="jogo-grade">' +
+      '<div class="jogo-esq"><div class="moldura" id="moldura-revelada"></div></div>' +
+      '<div class="jogo-dir">' + tarja +
+      '<div class="ficha">' +
       "<h2>" + esc(filme.titulo) + "</h2>" +
       '<p class="original">' + esc(filme.original) + " · " + filme.ano + "</p>" +
       "<dl>" +
@@ -495,8 +506,9 @@
       '<p class="curiosidade">' + esc(filme.curiosidade) + "</p>" +
       '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(comentario(filme)) + "</div>" +
       "</div>" +
-      '<div class="botoes"><button class="botao" id="btn-proximo">' +
-      (ultimo ? "Ver o placar da sessão" : "Próximo cartaz") + "</button></div>";
+      '<button class="acao" id="btn-proximo" style="margin-top:20px">' +
+      (ultimo ? "Ver o placar da sessão" : "Próximo cartaz") + "</button>" +
+      "</div></div>";
 
     montarImagem($("moldura-revelada"), filme, 0, true);
     $("btn-proximo").onclick = function () {
@@ -627,16 +639,16 @@
     }).join("");
 
     $("tela-fim").innerHTML =
-      '<div class="cartao"><div class="placar">' +
+      '<div class="coluna-estreita"><div class="placar">' +
       '<div class="estrelas">' + "★".repeat(estrelas) + "☆".repeat(4 - estrelas) + "</div>" +
       '<p class="nota">' + nota(pontos) + "</p>" +
       '<p class="de">' + pontos + " de " + max + " pontos · " + acertos + " de " + p.itens.length + " cartazes</p>" +
       "</div>" +
       '<div class="grade-resultado"><span>' + gradeEmoji(p) + "</span></div>" +
       '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(fechamento(pontos)) + "</div>" +
-      '<ul class="resumo-lista">' + lista + "</ul></div>" +
-      '<div class="botoes"><button class="botao" id="btn-compartilhar">Compartilhar resultado</button></div>' +
-      '<div class="cartao desafio"><h3>Desafie alguém</h3>' +
+      '<ul class="resumo-lista">' + lista + "</ul>" +
+      '<button class="acao" id="btn-compartilhar" style="margin-top:22px">Compartilhar resultado</button>' +
+      '<div class="desafio"><h3>Desafie alguém</h3>' +
       "<p>A gente escreve a mensagem, você só escolhe para quem.</p>" +
       '<div class="campos">' +
       '<input id="desafio-eu" type="text" maxlength="16" autocomplete="off" placeholder="Seu nome (opcional)" aria-label="Seu nome">' +
@@ -644,16 +656,14 @@
       "</div>" +
       '<div class="aviso" id="desafio-aviso"></div>' +
       '<div class="previa" id="desafio-previa"></div>' +
-      '<div class="botoes"><button class="botao" id="btn-desafiar">Abrir no WhatsApp</button>' +
-      '<button class="botao secundario" id="btn-copiar-desafio">Copiar</button></div></div>' +
+      '<button class="acao" id="btn-desafiar">Abrir no WhatsApp</button>' +
+      '<button class="acao calma" id="btn-copiar-desafio" style="margin-top:8px">Copiar mensagem</button></div>' +
       (proxima
-        ? '<div class="botoes"><button class="botao secundario" style="flex:1" id="btn-proxima-sessao">' +
-          (sessao2Liberada(estado.dia) || proxima.id === 1
-            ? "Ir para a " + esc(proxima.nome)
-            : "A " + esc(proxima.nome) + " está liberada") + "</button></div>"
+        ? '<button class="acao calma" id="btn-proxima-sessao" style="margin-top:22px">Ir para a ' +
+          esc(proxima.nome) + "</button>"
         : "") +
-      '<div class="botoes"><button class="botao secundario" style="flex:1" id="btn-voltar-sessoes">Voltar</button></div>' +
-      chamadaImpulso();
+      '<button class="acao calma" id="btn-voltar-sessoes" style="margin-top:8px">Voltar</button>' +
+      "</div>" + chamadaImpulso();
 
     $("btn-compartilhar").onclick = function () {
       global.METRICAS.evento("compartilhou", "Compartilhou o resultado");
@@ -710,17 +720,18 @@
       quadros += '<button class="' + classe + '" data-dia="' + d + '">' + d + "</button>";
     }
     $("tela-cinemateca").innerHTML =
-      '<div class="cartao"><h2>Cinemateca</h2>' +
-      "<p>Chegou agora? Nenhum dia se perde: dá pra jogar desde o dia 1. " +
+      '<div class="coluna-estreita"><h2 style="font-size:2rem;margin-bottom:10px">Cinemateca</h2>' +
+      '<p style="color:var(--fraco);font-size:.92rem;margin:0">' +
+      "Chegou agora? Nenhum dia se perde: dá pra jogar desde o dia 1. " +
       "O acervo tem " + CAL.acervo.length + " filmes e passa " + CAL.diasPorCiclo +
       " dias sem repetir um cartaz.</p>" +
       '<div class="grade-dias" id="grade-dias">' + quadros + "</div>" +
       '<div class="legenda">' +
-      '<span><i style="background:rgba(92,184,122,.5)"></i>dia completo</span>' +
-      '<span><i style="background:rgba(245,179,45,.5)"></i>começado</span>' +
-      '<span><i style="background:#1e1e29;border:1px solid #2c2c3a"></i>não jogado</span>' +
-      "</div></div>" +
-      '<div class="botoes"><button class="botao secundario" style="flex:1" id="fechar-cinemateca">Voltar</button></div>';
+      '<span><i style="background:rgba(78,164,106,.6)"></i>dia completo</span>' +
+      '<span><i style="background:rgba(253,185,8,.5)"></i>começado</span>' +
+      '<span><i style="background:#17171a"></i>não jogado</span>' +
+      "</div>" +
+      '<button class="acao calma" id="fechar-cinemateca" style="margin-top:22px">Voltar</button></div>';
 
     Array.prototype.forEach.call($("grade-dias").querySelectorAll("button"), function (b) {
       b.onclick = function () { estado.dia = +b.dataset.dia; telaSessoes(); };
