@@ -257,8 +257,9 @@
     $("tela-jogo").innerHTML =
       '<div class="jogo-grade">' +
       '<div class="jogo-esq">' +
+      '<div class="vitrine"><span class="placa">Em Cartaz</span>' +
       '<div class="moldura" id="moldura"><div class="carregando">carregando…</div></div>' +
-      "</div>" +
+      "</div></div>" +
       '<div class="jogo-dir">' +
       '<div class="cabeca"><h1>' + esc(nome) + " <i>·</i> " +
       (p.atual + 1) + " de " + p.itens.length + "</h1>" +
@@ -510,7 +511,9 @@
 
     $("tela-revelacao").innerHTML =
       '<div class="jogo-grade">' +
-      '<div class="jogo-esq"><div class="moldura" id="moldura-revelada"></div></div>' +
+      '<div class="jogo-esq">' +
+      '<div class="vitrine"><span class="placa">Em Cartaz</span>' +
+      '<div class="moldura" id="moldura-revelada"></div></div></div>' +
       '<div class="jogo-dir">' + tarja +
       '<div class="ficha">' +
       "<h2>" + esc(filme.titulo) + "</h2>" +

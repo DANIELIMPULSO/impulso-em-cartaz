@@ -191,8 +191,25 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
 .trilha i.errou{background:var(--vermelho)}
 .trilha i.agora{background:var(--ambar)}
 
+/* vitrine: o quadro de cartaz que fica na porta do cinema, com a plaquinha
+   "Em Cartaz" em cima. Serve de moldura pro pôster e diz, sem explicar, que
+   e ali que a pessoa tem que olhar. */
+.vitrine{
+  position:relative;padding:34px 12px 12px;border-radius:18px;
+  background:linear-gradient(#1e1e23,#141417);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.055),0 16px 38px rgba(0,0,0,.5);
+}
+.vitrine .placa{
+  position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  background:#f2efe4;color:#1a1a1f;font-family:var(--fonte-titulo);
+  font-size:.82rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:3px 15px 2px;border-radius:3px;white-space:nowrap;
+  background-image:repeating-linear-gradient(180deg,rgba(0,0,0,.05) 0 1px,transparent 1px 9px);
+  box-shadow:0 2px 8px rgba(0,0,0,.45),inset 0 -1px 0 rgba(0,0,0,.12);
+}
+
 .moldura{
-  position:relative;width:100%;aspect-ratio:1/1;border-radius:20px;overflow:hidden;
+  position:relative;width:100%;aspect-ratio:1/1;border-radius:10px;overflow:hidden;
   background:#000;display:grid;place-items:center;
 }
 .moldura img,.moldura canvas{width:100%;height:100%;object-fit:cover;display:block;animation:aparecer .3s ease}
@@ -370,7 +387,9 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
     display:grid;grid-template-columns:auto 400px;gap:64px;
     align-items:center;justify-content:center;padding:44px 0;
   }
-  .jogo-grade .moldura{aspect-ratio:3/4;height:min(62vh,540px);width:auto}
+  .jogo-grade .vitrine{width:max-content;padding:40px 14px 14px}
+  .jogo-grade .vitrine .placa{font-size:.92rem;top:11px}
+  .jogo-grade .moldura{aspect-ratio:3/4;height:min(58vh,520px);width:auto}
   .cabeca{display:block;margin:0 0 24px}
   .cabeca h1{font-size:2.6rem;margin-bottom:12px}
   .trilha i{width:42px}
