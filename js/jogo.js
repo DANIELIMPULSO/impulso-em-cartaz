@@ -110,10 +110,13 @@
     faixaArquivo();
     var d = U.dataDoDia(CFG.dataInicio, estado.dia);
     var html =
-      '<div class="abertura"><h1>Em Cartaz</h1>' +
+      '<div class="abertura">' +
+      '<div class="marquise"><div class="painel">' +
+      "<h1>Em Cartaz</h1>" +
       '<p class="data">Dia ' + estado.dia + " · " + U.dataCurta(d) + "</p>" +
-      "<p>Oito cartazes quadriculados, em duas sessões. Quatro tentativas em cada um — " +
-      "e a imagem ganha definição a cada erro.</p></div>" +
+      "</div></div>" +
+      '<p class="apresentacao">Oito cartazes quadriculados, em duas sessões. ' +
+      "Quatro tentativas em cada um — e a imagem ganha definição a cada erro.</p></div>" +
       '<div class="lista-sessoes">';
 
     CFG.sessoes.forEach(function (s, i) {
