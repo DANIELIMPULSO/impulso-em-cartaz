@@ -65,12 +65,18 @@
      Nunca deixa o jogo esperando: se o painel nao responder, some. */
   function frase() {
     if (!ligado || CFG.mostrarContador === false) return Promise.resolve(null);
+    var pisoVisitas = CFG.minimoDeVisitas == null ? 30 : CFG.minimoDeVisitas;
+    var pisoSessoes = CFG.minimoDeSessoes == null ? 10 : CFG.minimoDeSessoes;
     return Promise.all([contar("TOTAL"), contar("partida-concluida")])
       .then(function (r) {
         var visitas = r[0], partidas = r[1];
         var partes = [];
-        if (partidas) partes.push(formatar(partidas) + (partidas === 1 ? " sessão jogada" : " sessões jogadas"));
-        if (visitas) partes.push(formatar(visitas) + (visitas === 1 ? " visita" : " visitas"));
+        if (partidas >= pisoSessoes) {
+          partes.push(formatar(partidas) + (partidas === 1 ? " sessão jogada" : " sessões jogadas"));
+        }
+        if (visitas >= pisoVisitas) {
+          partes.push(formatar(visitas) + (visitas === 1 ? " visita" : " visitas"));
+        }
         return partes.length ? partes.join(" · ") : null;
       });
   }

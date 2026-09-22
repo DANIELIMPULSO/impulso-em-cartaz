@@ -193,6 +193,11 @@ Para o jogo exibir "N sessões jogadas · M visitas", ligue em
 **Settings → Allow adding visitor counts to your website** no painel do
 GoatCounter. Sem isso o número simplesmente não aparece, e nada quebra.
 
+O número só entra depois de `minimoDeVisitas` (30) e `minimoDeSessoes` (10),
+no `config.js`: contador baixo em jogo recém-lançado passa a impressão de
+lugar vazio e desanima quem acabou de chegar. Para ver o número desde o
+primeiro acesso, é só zerar esses dois valores.
+
 ### Sobre `dados/nomes.js`
 
 Esse arquivo valida apelidos e barra palavrão, ofensa e spam — está pronto e

@@ -59,7 +59,11 @@ window.CARTAZ_CONFIG = {
      "Allow adding visitor counts to your website" nas Settings do painel. */
   metricas: {
     goatcounter: "impulso-em-cartaz",
-    mostrarContador: true
+    mostrarContador: true,
+    /* Numero pequeno no rodape denuncia jogo vazio e desanima quem chega.
+       O contador so aparece depois destes patamares. */
+    minimoDeVisitas: 30,
+    minimoDeSessoes: 10
   },
 
   /* --- textos --- */
