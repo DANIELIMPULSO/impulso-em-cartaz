@@ -29,6 +29,12 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
   quem chegar atrasado não perde nada.
 - No fim da sessão sai o placar em estrelas, a grade de emojis para compartilhar
   e a chamada da Impulso.
+- **Desafie alguém**: a pessoa escreve o próprio nome e o de quem vai receber,
+  vê a prévia montando em tempo real e abre o WhatsApp com a mensagem pronta
+  (`https://wa.me/?text=...`, que funciona no celular e no WhatsApp Web). Os
+  dois nomes são opcionais e passam pelo filtro de `dados/nomes.js` — sem isso,
+  daria para mandar desaforo assinado com o link da Impulso. O próprio nome
+  fica guardado para a próxima vez.
 
 ## O acervo
 
@@ -185,6 +191,8 @@ Para ligar: crie o site em goatcounter.com e ponha o código no `config.js`
 | `pontos/0` … `pontos/16` | com quanto fechou — mostra se está fácil ou difícil demais |
 | `compartilhou` | clicou em compartilhar o resultado |
 | `cinemateca` | jogou um dia anterior |
+| `desafiou-amigo` | abriu o WhatsApp com o desafio pronto |
+| `copiou-desafio` | copiou a mensagem de desafio |
 | `saiu-pra-impulso` | **clicou para o site da Impulso** — a métrica de negócio |
 
 ### O contador no rodapé
@@ -200,10 +208,12 @@ primeiro acesso, é só zerar esses dois valores.
 
 ### Sobre `dados/nomes.js`
 
-Esse arquivo valida apelidos e barra palavrão, ofensa e spam — está pronto e
-testado, mas **não é carregado hoje**, porque o jogo não tem placar com nome.
-Ficou guardado para o dia em que houver: placar compartilhado exige um servidor
-(o GitHub Pages não guarda dado), e aí ele entra junto.
+Valida apelidos e barra palavrão, ofensa, spam e tentativa de se passar pela
+marca. É usado no **Desafie alguém** e está pronto para um eventual placar com
+nome. Entende disfarce: `C4R4LH0`, `p u t a` e `caaaralho` caem; "Pinto",
+"Betânia", "Ana Luiza" e "Curitiba" passam. São 43 casos de teste — se for
+mexer nas listas, rode-os antes, porque termo curto demais em `TRECHOS` começa
+a reprovar nome de gente.
 
 ---
 

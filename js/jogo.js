@@ -491,6 +491,72 @@
     }).join("");
   }
 
+  /* Mensagem de desafio pro WhatsApp. Os dois nomes sao opcionais: sem eles
+     o texto continua fazendo sentido, so perde o endereco pessoal. */
+  function textoDesafio(p, eu, amigo) {
+    var linhas = [];
+    linhas.push("\uD83C\uDFAC " + (amigo ? amigo + ", quantos" : "Quantos") +
+      " filmes você reconhece só pelo cartaz desfocado?");
+    linhas.push("");
+    linhas.push("Meu placar de hoje: " + gradeEmoji(p) + " " + pontosDa(p) +
+      "/" + (p.itens.length * CFG.tentativasPorDesafio));
+    linhas.push("São 8 cartazes por dia, 4 tentativas cada. Bate esse?");
+    linhas.push("");
+    linhas.push(CFG.urlDoJogo);
+    if (eu) {
+      linhas.push("");
+      linhas.push("Desafio de " + eu + " \uD83C\uDF7F");
+    }
+    return linhas.join("\n");
+  }
+
+  var CHAVE_APELIDO = "cartaz.v1.apelido";
+
+  function montarDesafio(p) {
+    var eu = $("desafio-eu"), amigo = $("desafio-amigo");
+    var aviso = $("desafio-aviso"), previa = $("desafio-previa");
+    var guardado = U.ler(CHAVE_APELIDO, "");
+    if (guardado) eu.value = guardado;
+
+    function nomes() {
+      var lista = [["Seu nome", eu.value], ["O nome de quem recebe", amigo.value]];
+      for (var i = 0; i < lista.length; i++) {
+        var valor = String(lista[i][1] || "").trim();
+        if (!valor) continue;
+        var r = global.NOMES.conferir(valor);
+        if (!r.ok) return { erro: lista[i][0] + ": " + r.motivo };
+      }
+      return { eu: String(eu.value || "").trim(), amigo: String(amigo.value || "").trim() };
+    }
+
+    function atualizar() {
+      var n = nomes();
+      aviso.textContent = n.erro || "";
+      var texto = textoDesafio(p, n.erro ? "" : n.eu, n.erro ? "" : n.amigo);
+      previa.textContent = texto;
+      return n.erro ? null : texto;
+    }
+
+    eu.oninput = amigo.oninput = atualizar;
+    atualizar();
+
+    $("btn-desafiar").onclick = function () {
+      var texto = atualizar();
+      if (!texto) { aviso.textContent = aviso.textContent || "Revise os nomes."; return; }
+      U.gravar(CHAVE_APELIDO, String(eu.value || "").trim());
+      global.METRICAS.evento("desafiou-amigo", "Desafiou alguém no WhatsApp");
+      global.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank", "noopener");
+    };
+
+    $("btn-copiar-desafio").onclick = function () {
+      var texto = atualizar();
+      if (!texto) return;
+      U.gravar(CHAVE_APELIDO, String(eu.value || "").trim());
+      global.METRICAS.evento("copiou-desafio", "Copiou a mensagem de desafio");
+      copiar(texto, this, "Mensagem copiada!");
+    };
+  }
+
   function textoCompartilhavel(p) {
     var nome = CFG.sessoes.filter(function (s) { return s.id === p.sessao; })[0].nome;
     return CFG.nome + " · Dia " + p.dia + " · " + nome + "\n" +
@@ -530,6 +596,16 @@
       '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(fechamento(pontos)) + "</div>" +
       '<ul class="resumo-lista">' + lista + "</ul></div>" +
       '<div class="botoes"><button class="botao" id="btn-compartilhar">Compartilhar resultado</button></div>' +
+      '<div class="cartao desafio"><h3>Desafie alguém</h3>' +
+      "<p>A gente escreve a mensagem, você só escolhe para quem.</p>" +
+      '<div class="campos">' +
+      '<input id="desafio-eu" type="text" maxlength="16" autocomplete="off" placeholder="Seu nome (opcional)" aria-label="Seu nome">' +
+      '<input id="desafio-amigo" type="text" maxlength="16" autocomplete="off" placeholder="Nome de quem vai receber (opcional)" aria-label="Nome de quem vai receber">' +
+      "</div>" +
+      '<div class="aviso" id="desafio-aviso"></div>' +
+      '<div class="previa" id="desafio-previa"></div>' +
+      '<div class="botoes"><button class="botao" id="btn-desafiar">Abrir no WhatsApp</button>' +
+      '<button class="botao secundario" id="btn-copiar-desafio">Copiar</button></div></div>' +
       (proxima
         ? '<div class="botoes"><button class="botao secundario" style="flex:1" id="btn-proxima-sessao">' +
           (sessao2Liberada(estado.dia) || proxima.id === 1
@@ -545,34 +621,40 @@
     };
     if (proxima) $("btn-proxima-sessao").onclick = function () { abrirSessao(estado.dia, proxima.id); };
     $("btn-voltar-sessoes").onclick = telaSessoes;
+    montarDesafio(p);
     pintarLogos();
     ligarChamada();
     mostrar("fim");
   }
 
-  function compartilhar(p, botao) {
-    var texto = textoCompartilhavel(p);
+  function copiar(texto, botao, recado) {
     function avisar(msg) {
       var antes = botao.textContent;
       botao.textContent = msg;
       setTimeout(function () { botao.textContent = antes; }, 1800);
     }
-    if (navigator.share) {
-      navigator.share({ text: texto }).catch(function () {});
-      return;
-    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(texto)
-        .then(function () { avisar("Copiado!"); })
-        .catch(function () { avisar("Copie: " + texto.split("\n")[1]); });
+        .then(function () { avisar(recado || "Copiado!"); })
+        .catch(function () { avisar("Não deu pra copiar"); });
       return;
     }
     var ta = document.createElement("textarea");
     ta.value = texto;
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand("copy"); avisar("Copiado!"); } catch (e) { avisar("Não deu pra copiar"); }
+    try { document.execCommand("copy"); avisar(recado || "Copiado!"); }
+    catch (e) { avisar("Não deu pra copiar"); }
     document.body.removeChild(ta);
+  }
+
+  function compartilhar(p, botao) {
+    var texto = textoCompartilhavel(p);
+    if (navigator.share) {
+      navigator.share({ text: texto }).catch(function () {});
+      return;
+    }
+    copiar(texto, botao);
   }
 
   /* ================= cinemateca ================= */
