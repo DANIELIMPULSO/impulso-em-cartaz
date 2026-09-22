@@ -1,0 +1,288 @@
+/* IMPULSO EM CARTAZ — folha de estilo unica.
+   Tipografia e cores seguem a identidade da Impulso Filmes:
+     Anton          titulos, sempre em caixa alta
+     Work Sans      texto corrido
+     IBM Plex Mono  bigodes (aquelas etiquetinhas em caixa alta)
+   Trocar as variaveis abaixo troca o visual do jogo inteiro. */
+
+:root{
+  --fundo:#131313;        /* carvao do site */
+  --papel:#1c1c1c;
+  --papel-alto:#262626;
+  --linha:#343434;
+  --texto:#f4f2ee;
+  --texto-fraco:#a3a09a;
+  --impulso:#f5b32d;      /* ambar da marca */
+  --impulso-escuro:#c8901f;
+  --cortina:#e0472c;
+  --verde:#5cb87a;
+  --raio:14px;
+  --fonte:"Work Sans","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  --fonte-titulo:"Anton","Oswald","Impact","Haettenschweiler",sans-serif;
+  --fonte-mono:"IBM Plex Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  /* regua degrade da marca */
+  --regua:linear-gradient(90deg,#2f6fd0,#3aa857,#f5b32d,#ef7f2a,#e0472c);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--fundo);
+  color:var(--texto);
+  font-family:var(--fonte);
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:2rem;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.4;
+  background:radial-gradient(ellipse at 50% -10%,rgba(245,179,45,.10),transparent 60%);
+}
+button{font-family:inherit;font-size:1rem;cursor:pointer;border:0;background:none;color:inherit}
+a{color:var(--impulso)}
+
+.envelope{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:0 16px}
+
+/* bigode: etiqueta curta em caixa alta, sempre em mono */
+.bigode,.sessao-btn .etiqueta,.dica b,.selo,.cabecalho-jogo .titulo,.ficha dt,
+.impulso-comenta b,.numeros span,.legenda,.tentativas,.etiqueta-imagem,
+.placar .de,.rodape,.marca .assinatura,.marca .sobrenome,.resumo-lista .ano{
+  font-family:var(--fonte-mono);
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+
+h1,h2,h3,.nota{font-family:var(--fonte-titulo);font-weight:400;text-transform:uppercase;letter-spacing:.02em;line-height:1.05}
+
+/* ---------- regua degrade ---------- */
+.regua{height:3px;border-radius:2px;background:var(--regua);margin:0 0 14px}
+
+/* ---------- topo ---------- */
+.topo{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 0 10px}
+.marca{text-align:center;line-height:1}
+.marca .sobrenome{display:block;font-size:.62rem;font-weight:500;color:var(--impulso);letter-spacing:.3em}
+.marca b{
+  display:block;font-family:var(--fonte-titulo);font-weight:400;
+  font-size:clamp(1.6rem,8.5vw,2.4rem);letter-spacing:.01em;color:var(--texto);
+  white-space:nowrap;margin-top:2px;
+}
+.marca .assinatura{display:block;font-size:.58rem;color:var(--texto-fraco);margin-top:4px}
+.icone{
+  width:40px;height:40px;border-radius:50%;border:1px solid var(--linha);color:var(--texto-fraco);
+  display:grid;place-items:center;background:var(--papel);
+  transition:border-color .15s,background .15s,color .15s;flex:0 0 auto;
+}
+.icone:hover{border-color:var(--impulso);background:var(--papel-alto);color:var(--impulso)}
+.grupo-icones{display:flex;gap:6px}
+
+/* ---------- logotipo da Impulso ----------
+   Enquanto nao existir assets/logo-impulso.svg, o lockup e remontado aqui
+   com a propria tipografia da marca: IMPULSO em Anton e FILMES na vertical. */
+.logo-impulso{display:inline-flex;align-items:center;text-decoration:none;color:var(--impulso);vertical-align:middle}
+.logo-impulso img{display:none;height:26px;width:auto}
+.logo-impulso.tem-arquivo img{display:block}
+.logo-impulso.tem-arquivo .logo-texto{display:none}
+.logo-texto{display:inline-flex;align-items:stretch;gap:3px;line-height:.82}
+.logo-texto b{font-family:var(--fonte-titulo);font-weight:400;font-size:1.5rem;letter-spacing:-.01em}
+.logo-texto i{
+  font-family:var(--fonte-titulo);font-style:normal;font-size:.52rem;letter-spacing:.14em;
+  writing-mode:vertical-rl;text-orientation:mixed;align-self:stretch;
+  display:flex;align-items:flex-end;justify-content:flex-start;padding-top:2px;
+}
+
+/* ---------- faixas ---------- */
+.faixa{
+  background:var(--papel-alto);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:10px 14px;font-size:.82rem;color:var(--texto-fraco);margin-bottom:12px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+}
+.faixa b{color:var(--texto)}
+.faixa button{color:var(--impulso);font-size:.78rem;text-decoration:underline;white-space:nowrap;font-family:var(--fonte-mono);text-transform:uppercase;letter-spacing:.1em}
+
+/* ---------- cartoes ---------- */
+.cartao{
+  background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:18px;margin-bottom:14px;
+}
+.cartao h2{font-size:1.7rem;margin:0 0 4px}
+.cartao p{margin:0;color:var(--texto-fraco);font-size:.9rem}
+.sessao-linha{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left}
+.sessao-btn{
+  width:100%;background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:16px 18px;margin-bottom:12px;transition:border-color .15s,transform .1s;
+}
+.sessao-btn:hover:not(:disabled){border-color:var(--impulso);transform:translateY(-1px)}
+.sessao-btn:disabled{opacity:.55;cursor:not-allowed}
+.sessao-btn .etiqueta{font-size:.6rem;color:var(--impulso)}
+.sessao-btn h3{font-size:1.6rem;margin:3px 0 3px}
+.sessao-btn small{color:var(--texto-fraco);font-size:.82rem;font-family:var(--fonte)}
+.selo{
+  font-size:.62rem;border:1px solid var(--linha);border-radius:999px;
+  padding:5px 11px;color:var(--texto-fraco);white-space:nowrap;
+}
+.selo.ok{border-color:var(--verde);color:var(--verde)}
+.selo.andamento{border-color:var(--impulso);color:var(--impulso)}
+
+/* ---------- cabecalho do desafio ---------- */
+.cabecalho-jogo{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px}
+.cabecalho-jogo .titulo{font-size:.64rem;color:var(--texto-fraco)}
+.cabecalho-jogo .titulo b{color:var(--impulso);font-weight:500}
+.passos{display:flex;gap:6px}
+.passo{width:9px;height:9px;border-radius:50%;background:var(--linha)}
+.passo.feito{background:var(--verde)}
+.passo.errado{background:var(--cortina)}
+.passo.atual{background:var(--impulso);box-shadow:0 0 0 3px rgba(245,179,45,.18)}
+
+/* ---------- imagem ---------- */
+.moldura{
+  position:relative;width:100%;aspect-ratio:2/3;max-height:44vh;margin:0 auto 10px;
+  border-radius:var(--raio);overflow:hidden;background:#000;border:1px solid var(--linha);
+  display:grid;place-items:center;
+}
+.moldura.larga{aspect-ratio:16/9}
+.moldura img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:filter .5s ease,transform .5s ease;transform-origin:var(--foco,50% 50%);
+  filter:blur(var(--desfoque,26px)) grayscale(var(--cinza,1)) contrast(1.05);
+  transform:scale(var(--zoom,2.1));
+}
+.moldura .carregando{position:absolute;inset:0;display:grid;place-items:center;color:var(--texto-fraco);font-size:.7rem;font-family:var(--fonte-mono);letter-spacing:.2em;text-transform:uppercase}
+.moldura .etiqueta-imagem{
+  position:absolute;left:8px;bottom:8px;font-size:.55rem;
+  background:rgba(0,0,0,.6);border-radius:999px;padding:4px 10px;color:#ddd;
+}
+
+/* ---------- dicas ---------- */
+.dicas{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;min-height:30px}
+.dica{
+  background:var(--papel);border:1px solid var(--linha);border-left:3px solid var(--impulso);
+  border-radius:8px;padding:7px 11px;font-size:.84rem;line-height:1.4;animation:surgir .25s ease;
+  display:flex;gap:9px;align-items:baseline;
+}
+.dica b{color:var(--impulso);font-weight:500;font-size:.55rem;flex:0 0 auto;white-space:nowrap}
+@keyframes surgir{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* ---------- palpite ---------- */
+.palpite{position:relative}
+.palpite input{
+  width:100%;padding:14px 16px;border-radius:var(--raio);border:1px solid var(--linha);
+  background:var(--papel);color:var(--texto);font-size:1rem;outline:none;font-family:var(--fonte);
+}
+.palpite input:focus{border-color:var(--impulso)}
+.sugestoes{
+  /* abre PARA CIMA: se abrisse pra baixo, cobriria os botoes de chutar e
+     desistir e roubaria o toque no celular */
+  position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:20;
+  background:var(--papel-alto);border:1px solid var(--linha);border-radius:var(--raio);
+  overflow:hidden auto;max-height:230px;box-shadow:0 12px 32px rgba(0,0,0,.5);
+}
+.sugestoes button{display:block;width:100%;text-align:left;padding:11px 14px;font-size:.92rem;border-bottom:1px solid var(--linha)}
+.sugestoes button:last-child{border-bottom:0}
+.sugestoes button:hover,.sugestoes button.marcada{background:var(--impulso);color:#151515}
+.sugestoes small{color:var(--texto-fraco);margin-left:6px;font-family:var(--fonte-mono);font-size:.7rem}
+.sugestoes button:hover small,.sugestoes button.marcada small{color:#3a2f10}
+
+.botoes{display:flex;gap:8px;margin-top:10px}
+.botao{
+  flex:1;padding:14px 16px;border-radius:var(--raio);
+  font-family:var(--fonte-titulo);font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--impulso);color:#171717;transition:filter .15s;
+}
+.botao:hover{filter:brightness(1.08)}
+.botao.secundario{background:transparent;border:1px solid var(--linha);color:var(--texto-fraco);flex:0 0 auto}
+.botao.secundario:hover{border-color:var(--cortina);color:var(--cortina)}
+.botao:disabled{opacity:.5;cursor:not-allowed;filter:none}
+
+.tentativas{display:flex;gap:6px;justify-content:center;margin-top:10px;font-size:.62rem;color:var(--texto-fraco)}
+.erro-anterior{margin-top:10px;font-size:.85rem;color:var(--cortina);text-align:center;animation:tremer .3s}
+@keyframes tremer{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* ---------- revelacao ---------- */
+.ficha h2{font-size:2rem;margin:0 0 3px}
+.ficha .original{color:var(--texto-fraco);font-size:.85rem;font-style:italic;margin:0 0 10px}
+.ficha dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0 0 12px;font-size:.88rem}
+.ficha dt{color:var(--texto-fraco);font-size:.58rem;padding-top:4px}
+.ficha dd{margin:0}
+.ficha .curiosidade{font-size:.9rem;border-top:1px solid var(--linha);padding-top:10px;margin:0 0 10px}
+.impulso-comenta{
+  background:linear-gradient(135deg,rgba(245,179,45,.14),rgba(245,179,45,.03));
+  border:1px solid rgba(245,179,45,.35);border-radius:var(--raio);padding:12px 14px;font-size:.88rem;
+}
+.impulso-comenta b{display:block;font-size:.58rem;color:var(--impulso);margin-bottom:5px;font-weight:500}
+.resultado-tarja{
+  text-align:center;font-family:var(--fonte-titulo);letter-spacing:.06em;text-transform:uppercase;
+  font-size:1.25rem;padding:9px;border-radius:var(--raio);margin-bottom:12px;
+}
+.resultado-tarja.acerto{background:rgba(92,184,122,.15);color:var(--verde);border:1px solid rgba(92,184,122,.4)}
+.resultado-tarja.erro{background:rgba(224,71,44,.13);color:var(--cortina);border:1px solid rgba(224,71,44,.4)}
+
+/* ---------- fim de sessao ---------- */
+.placar{text-align:center;padding:6px 0 4px}
+.placar .estrelas{font-size:1.6rem;letter-spacing:.14em;color:var(--impulso)}
+.placar .nota{font-size:2.3rem;margin:6px 0 0}
+.placar .de{color:var(--texto-fraco);font-size:.62rem;margin-top:4px}
+.grade-resultado{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.grade-resultado span{font-size:1.5rem;letter-spacing:.1em}
+.resumo-lista{list-style:none;padding:0;margin:12px 0 0;font-size:.88rem}
+.resumo-lista li{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--linha)}
+.resumo-lista li:last-child{border-bottom:0}
+.resumo-lista .ano{color:var(--texto-fraco);font-size:.7rem}
+
+/* ---------- cinemateca ---------- */
+.grade-dias{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;margin-top:12px}
+.dia-quadro{
+  aspect-ratio:1;border-radius:10px;border:1px solid var(--linha);background:var(--papel);
+  display:grid;place-items:center;font-size:.8rem;color:var(--texto-fraco);
+  font-family:var(--fonte-mono);
+}
+.dia-quadro.jogavel{color:var(--texto)}
+.dia-quadro.completo{background:rgba(92,184,122,.2);border-color:rgba(92,184,122,.5);color:var(--texto)}
+.dia-quadro.parcial{background:rgba(245,179,45,.18);border-color:rgba(245,179,45,.5);color:var(--texto)}
+.dia-quadro.hoje{outline:2px solid var(--impulso);outline-offset:2px}
+.legenda{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:.58rem;color:var(--texto-fraco)}
+.legenda i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1px}
+
+/* ---------- numeros ---------- */
+.numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin:8px 0 4px}
+.numeros b{display:block;font-family:var(--fonte-titulo);font-size:1.9rem;font-weight:400}
+.numeros span{font-size:.55rem;color:var(--texto-fraco)}
+
+/* ---------- chamada da impulso ---------- */
+.chamada{
+  background:var(--papel);border:1px solid rgba(245,179,45,.35);border-radius:var(--raio);
+  padding:0 0 20px;margin:16px 0 8px;text-align:center;overflow:hidden;
+}
+.chamada .regua{margin:0 0 18px;border-radius:0}
+.chamada .miolo{padding:0 18px}
+.chamada h3{font-size:1.45rem;margin:0 0 8px}
+.chamada p{font-size:.88rem;color:var(--texto-fraco);margin:0 0 14px}
+.chamada .logo-impulso{margin-bottom:12px}
+.chamada a.cta{
+  display:inline-block;background:var(--impulso);color:#171717;text-decoration:none;
+  font-family:var(--fonte-titulo);letter-spacing:.06em;text-transform:uppercase;
+  padding:12px 26px;border-radius:999px;font-size:1rem;
+}
+
+/* ---------- modal ---------- */
+.fundo-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:grid;place-items:center;padding:16px;z-index:50}
+.modal{
+  background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:20px;max-width:520px;width:100%;max-height:86vh;overflow:auto;position:relative;
+}
+.modal h2{font-size:1.7rem;margin:0 0 10px}
+.modal p,.modal li{font-size:.9rem;color:var(--texto-fraco)}
+.modal b{color:var(--texto)}
+.fechar{position:absolute;top:10px;right:12px;font-size:1.3rem;color:var(--texto-fraco)}
+
+.rodape{text-align:center;font-size:.56rem;color:var(--texto-fraco);margin-top:22px;line-height:2}
+.rodape a{color:var(--texto-fraco);text-decoration:underline}
+.rodape .logo-impulso{margin:0 2px}
+.rodape .logo-texto b{font-size:1.05rem}
+.rodape .logo-texto i{font-size:.36rem}
+
+.oculto{display:none !important}
+
+@media (max-height:720px){
+  .moldura{max-height:38vh}
+}

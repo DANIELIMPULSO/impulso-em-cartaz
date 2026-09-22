@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Impulso em Cartaz — o joguinho cinéfilo da Impulso Filmes</title>
+<meta name="description" content="Todo dia, oito cartazes de cinema desfocados em duas sessões. Adivinhe o filme, de Méliès a Bacurau. Um joguinho da Impulso Filmes.">
+<meta name="theme-color" content="#131313">
+<meta property="og:title" content="Impulso em Cartaz — o joguinho cinéfilo da Impulso Filmes">
+<meta property="og:description" content="Quatro cartazes na Matinê, quatro na Sessão da Meia-Noite. Todo dia. Sem login.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23131313'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23f5b32d' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='7' fill='%23f5b32d'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/fontes/fontes.css">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<div class="envelope">
+
+  <header class="topo">
+    <button class="icone" id="btn-ajuda" title="Como jogar" aria-label="Como jogar">?</button>
+    <div class="marca">
+      <span class="sobrenome">Impulso Filmes apresenta</span>
+      <b>EM CARTAZ</b>
+      <span class="assinatura">um joguinho pra cinéfilo</span>
+    </div>
+    <div class="grupo-icones">
+      <button class="icone" id="btn-cinemateca" title="Cinemateca (dias anteriores)" aria-label="Cinemateca">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>
+        </svg>
+      </button>
+      <button class="icone" id="btn-numeros" title="Seus números" aria-label="Seus números">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M5 20V10M12 20V4M19 20v-7"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="regua"></div>
+
+  <main id="app">
+    <div class="faixa oculto" id="faixa-arquivo"></div>
+    <section id="tela-sessoes"></section>
+    <section id="tela-jogo" class="oculto"></section>
+    <section id="tela-revelacao" class="oculto"></section>
+    <section id="tela-fim" class="oculto"></section>
+    <section id="tela-cinemateca" class="oculto"></section>
+  </main>
+
+  <p class="rodape" id="rodape"></p>
+</div>
+
+<div id="modal-raiz"></div>
+
+<script src="config.js"></script>
+<script src="dados/filmes.js"></script>
+<script src="dados/piadas.js"></script>
+<script src="js/util.js"></script>
+<script src="js/calendario.js"></script>
+<script src="js/imagens.js"></script>
+<script src="js/jogo.js"></script>
+</body>
+</html>

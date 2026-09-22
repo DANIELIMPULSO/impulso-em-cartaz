@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Impulso em Cartaz — conferência de cartazes</title>
+<link rel="stylesheet" href="../assets/fontes/fontes.css">
+<link rel="stylesheet" href="../css/estilo.css">
+<style>
+  .envelope{max-width:1000px}
+  .barra{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .barra button{border:1px solid var(--linha);background:var(--papel);padding:9px 14px;border-radius:999px;font-size:.85rem}
+  .barra button.ativo{background:var(--impulso);color:#171717;border-color:var(--impulso)}
+  .placar-diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0 16px}
+  .placar-diag div{background:var(--papel);border:1px solid var(--linha);border-radius:10px;padding:10px;text-align:center}
+  .placar-diag b{display:block;font-size:1.5rem;font-family:var(--fonte-titulo);font-weight:400}
+  .placar-diag span{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--texto-fraco)}
+  .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px}
+  .item{background:var(--papel);border:1px solid var(--linha);border-radius:10px;overflow:hidden;font-size:.72rem}
+  .item.falhou{border-color:var(--cortina)}
+  .item img{width:100%;height:170px;object-fit:cover;display:block;background:#000}
+  .item .txt{padding:6px 8px}
+  .item .fonte{color:var(--texto-fraco);font-size:.64rem;word-break:break-all}
+  .progresso{height:4px;background:var(--linha);border-radius:2px;overflow:hidden;margin-bottom:12px}
+  .progresso i{display:block;height:100%;background:var(--impulso);width:0;transition:width .2s}
+  textarea{width:100%;height:150px;background:var(--papel);color:var(--texto);border:1px solid var(--linha);border-radius:10px;padding:10px;font-family:monospace;font-size:.75rem}
+</style>
+</head>
+<body>
+<div class="envelope">
+  <h1 style="font-family:var(--fonte-titulo);font-weight:400;letter-spacing:.06em;margin:18px 0 4px">CONFERÊNCIA DE CARTAZES</h1>
+  <p style="color:var(--texto-fraco);font-size:.88rem;margin:0">
+    Esta página tenta resolver a imagem de cada filme do acervo do mesmo jeito que o jogo faz
+    (Wikipédia, ou TMDB se você tiver posto uma chave). Rode no seu navegador antes de divulgar o jogo:
+    o que aparecer em vermelho vai cair no cartaz tipográfico.
+  </p>
+
+  <div class="barra">
+    <button id="b-hoje" class="ativo">Só os de hoje (8)</button>
+    <button id="b-tudo">Acervo inteiro</button>
+    <button id="b-cache">Limpar cache e repetir</button>
+    <button id="b-falhas">Copiar lista de falhas</button>
+  </div>
+
+  <div class="progresso"><i id="barra"></i></div>
+  <div class="placar-diag" id="placar"></div>
+  <div class="grade" id="grade"></div>
+
+  <details style="margin:20px 0">
+    <summary style="cursor:pointer;color:var(--impulso)">Como consertar um cartaz que falhou</summary>
+    <p style="font-size:.85rem;color:var(--texto-fraco)">
+      Abra <code>dados/filmes.js</code>, ache o filme pelo <code>id</code> e acrescente o campo
+      <code>imagem</code> com o endereço de uma imagem pública (ou ponha o arquivo em
+      <code>dados/imagens/&lt;id&gt;.jpg</code> e ligue <code>usarImagensLocais</code> no
+      <code>config.js</code>). O campo <code>imagem</code> tem prioridade sobre tudo.
+    </p>
+    <textarea id="saida" placeholder="A lista de falhas aparece aqui depois do teste."></textarea>
+  </details>
+</div>
+
+<script src="../config.js"></script>
+<script src="../dados/filmes.js"></script>
+<script src="../js/util.js"></script>
+<script src="../js/calendario.js"></script>
+<script src="../js/imagens.js"></script>
+<script>
+(function () {
+  var grade = document.getElementById("grade");
+  var placar = document.getElementById("placar");
+  var barra = document.getElementById("barra");
+  var saida = document.getElementById("saida");
+  var falhas = [];
+
+  function cartao(filme, r) {
+    var ok = !r.gerada;
+    if (!ok) falhas.push(filme);
+    var d = document.createElement("div");
+    d.className = "item" + (ok ? "" : " falhou");
+    d.innerHTML =
+      '<img loading="lazy" src="' + r.url + '" alt="">' +
+      '<div class="txt"><b>' + filme.titulo + "</b> (" + filme.ano + ")" +
+      '<div class="fonte">' + (ok ? r.fonte : "NENHUMA IMAGEM") + "</div></div>";
+    grade.appendChild(d);
+  }
+
+  function resumo(total) {
+    var ok = total - falhas.length;
+    placar.innerHTML =
+      "<div><b>" + total + "</b><span>testados</span></div>" +
+      "<div><b style='color:var(--verde)'>" + ok + "</b><span>com cartaz</span></div>" +
+      "<div><b style='color:var(--cortina)'>" + falhas.length + "</b><span>sem imagem</span></div>" +
+      "<div><b>" + (total ? Math.round(ok / total * 100) : 0) + "%</b><span>cobertura</span></div>";
+    saida.value = falhas.length
+      ? falhas.map(function (f) { return f.id + "  —  " + f.titulo + " (" + f.ano + ")"; }).join("\n")
+      : "Nenhuma falha. Todos os cartazes carregaram.";
+  }
+
+  /* de 4 em 4 pra nao disparar 234 pedidos de uma vez */
+  function rodar(filmes) {
+    grade.innerHTML = ""; placar.innerHTML = ""; falhas = [];
+    var i = 0, prontos = 0, emCurso = 0, total = filmes.length;
+    function proximo() {
+      if (i >= total) { if (emCurso === 0) resumo(total); return; }
+      var filme = filmes[i++]; emCurso++;
+      IMG.resolver(filme).then(function (r) {
+        cartao(filme, r);
+        prontos++; emCurso--;
+        barra.style.width = Math.round(prontos / total * 100) + "%";
+        proximo();
+      });
+    }
+    for (var k = 0; k < 4; k++) proximo();
+  }
+
+  function marcar(id) {
+    ["b-hoje", "b-tudo"].forEach(function (b) {
+      document.getElementById(b).classList.toggle("ativo", b === id);
+    });
+  }
+
+  function doDia() {
+    var s = CAL.filmesDoDia(CAL.hoje());
+    return s[1].concat(s[2]);
+  }
+
+  document.getElementById("b-hoje").onclick = function () { marcar("b-hoje"); rodar(doDia()); };
+  document.getElementById("b-tudo").onclick = function () { marcar("b-tudo"); rodar(CAL.acervo); };
+  document.getElementById("b-cache").onclick = function () {
+    IMG.limparCache();
+    rodar(document.getElementById("b-tudo").classList.contains("ativo") ? CAL.acervo : doDia());
+  };
+  document.getElementById("b-falhas").onclick = function () {
+    navigator.clipboard && navigator.clipboard.writeText(saida.value);
+    this.textContent = "Copiado!";
+    var b = this;
+    setTimeout(function () { b.textContent = "Copiar lista de falhas"; }, 1500);
+  };
+
+  rodar(doDia());
+})();
+</script>
+</body>
+</html>
