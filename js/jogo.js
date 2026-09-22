@@ -111,29 +111,41 @@
     var d = U.dataDoDia(CFG.dataInicio, estado.dia);
     var html =
       '<div class="abertura"><h1>Em Cartaz</h1>' +
-      '<p class="data">Dia ' + estado.dia + " · " + U.dataPorExtenso(d) + "</p>" +
+      '<p class="data">Dia ' + estado.dia + " · " + U.dataCurta(d) + "</p>" +
       "<p>Oito cartazes quadriculados, em duas sessões. Quatro tentativas em cada um — " +
       "e a imagem ganha definição a cada erro.</p></div>" +
       '<div class="lista-sessoes">';
 
-    CFG.sessoes.forEach(function (s) {
+    CFG.sessoes.forEach(function (s, i) {
       var st = situacao(estado.dia, s.id);
       var liberada = s.id === 1 || sessao2Liberada(estado.dia);
       var p = partidas[chave(estado.dia, s.id)];
-      var selo = st === "fim"
-        ? '<span class="selo ok">' + pontosDa(p) + "/16</span>"
-        : (st === "andamento" ? '<span class="selo andamento">em andamento</span>'
-          : (liberada ? '<span class="selo">jogar</span>' : '<span class="selo">fechada</span>'));
+      var carimbo = "";
+      if (st === "fim") carimbo = '<span class="carimbo ok">' + pontosDa(p) + "/16</span>";
+      else if (st === "andamento") carimbo = '<span class="carimbo andamento">em andamento</span>';
+      else if (!liberada) carimbo = '<span class="carimbo fechada">fechada</span>';
+
       var recado = liberada
         ? (st === "fim" ? "Sessão encerrada — dá pra rever o resultado." : s.abertura)
         : (CFG.liberacaoSessao2 === "hora"
           ? "Abre às " + CFG.liberaSessao2Hora + "h."
           : "Abre quando você terminar a " + CFG.sessoes[0].nome + ".");
+
       html +=
-        '<button class="sessao-btn" data-sessao="' + s.id + '"' + (liberada ? "" : " disabled") + ">" +
-        '<span class="sessao-linha"><span>' +
-        '<span class="etiqueta">Sessão ' + s.id + "</span>" +
-        "<h3>" + esc(s.nome) + "</h3><small>" + esc(recado) + "</small></span>" + selo + "</span></button>";
+        '<button class="ingresso ' + (i === 0 ? "matine" : "meianoite") +
+        (carimbo ? " com-carimbo" : "") + '" data-sessao="' + s.id + '"' +
+        (liberada ? "" : " disabled") + ">" +
+        '<span class="furo cima"></span><span class="furo baixo"></span>' + carimbo +
+        '<span class="corpo">' +
+        '<span class="etiqueta">Impulso em Cartaz</span>' +
+        '<span class="nome">' + esc(s.nome) + "</span>" +
+        '<span class="recado">' + esc(recado) + "</span>" +
+        '<span class="rodape-ingresso"><span>Dia ' + estado.dia + "</span>" +
+        "<span>" + esc(U.dataCurta(d)) + "</span><span>4 cartazes</span></span>" +
+        "</span>" +
+        '<span class="canhoto"><span class="serie">' + (i === 0 ? "01" : "02") + "</span>" +
+        '<span class="admite">admite<br>um</span></span>' +
+        "</button>";
     });
 
     html += "</div>";
@@ -141,7 +153,7 @@
       html += chamadaImpulso();
     }
     $("tela-sessoes").innerHTML = html;
-    Array.prototype.forEach.call($("tela-sessoes").querySelectorAll(".sessao-btn"), function (b) {
+    Array.prototype.forEach.call($("tela-sessoes").querySelectorAll(".ingresso"), function (b) {
       b.onclick = function () { abrirSessao(estado.dia, +b.dataset.sessao); };
     });
     pintarLogos();

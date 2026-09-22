@@ -109,6 +109,13 @@
     return d;
   }
 
+  /* "22 set 2026" — cabe numa linha de ingresso, ao contrario do por extenso */
+  function dataCurta(d) {
+    var meses = ["jan", "fev", "mar", "abr", "mai", "jun",
+                 "jul", "ago", "set", "out", "nov", "dez"];
+    return d.getDate() + " " + meses[d.getMonth()] + " " + d.getFullYear();
+  }
+
   function dataPorExtenso(d) {
     var meses = ["jan", "fev", "mar", "abr", "mai", "jun",
                  "jul", "ago", "set", "out", "nov", "dez"];
@@ -157,6 +164,7 @@
     diaDeHoje: diaDeHoje,
     dataDoDia: dataDoDia,
     dataPorExtenso: dataPorExtenso,
+    dataCurta: dataCurta,
     ler: ler,
     gravar: gravar,
     apagar: apagar
