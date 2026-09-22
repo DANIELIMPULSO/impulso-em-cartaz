@@ -222,8 +222,8 @@
   function resolver(filme) {
     var reg = cache[filme.id];
     if (valido(reg)) {
-      if (reg.url) return Promise.resolve({ url: reg.url, fonte: reg.fonte, gerada: false });
-      return Promise.resolve({ url: cartazGerado(filme), fonte: "gerada", gerada: true });
+      if (reg.url) return Promise.resolve({ url: reg.url, fonte: reg.fonte, gerada: false, doCache: true });
+      return Promise.resolve({ url: cartazGerado(filme), fonte: "gerada", gerada: true, doCache: true });
     }
     if (pendentes[filme.id]) return pendentes[filme.id];
 
@@ -245,6 +245,13 @@
     (filmes || []).forEach(function (f) { if (f) resolver(f); });
   }
 
+  /* Esquece so os filmes indicados, pra tentar de novo sem jogar fora o
+     cache inteiro (o que obrigaria a refazer o acervo todo). */
+  function esquecer(filmes) {
+    (filmes || []).forEach(function (f) { delete cache[f.id || f]; });
+    global.U.gravar(CHAVE, cache);
+  }
+
   function limparCache() {
     cache = {};
     global.U.apagar(CHAVE);
@@ -253,6 +260,7 @@
   global.IMG = {
     resolver: resolver,
     precarregar: precarregar,
+    esquecer: esquecer,
     cartazGerado: cartazGerado,
     limparCache: limparCache
   };

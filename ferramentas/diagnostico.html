@@ -65,71 +65,105 @@
 <script src="../js/imagens.js"></script>
 <script>
 (function () {
-  var grade = document.getElementById("grade");
-  var placar = document.getElementById("placar");
-  var barra = document.getElementById("barra");
-  var saida = document.getElementById("saida");
-  var falhas = [];
+  const grade = document.getElementById("grade");
+  const placar = document.getElementById("placar");
+  const barra = document.getElementById("barra");
+  const saida = document.getElementById("saida");
+  const botoes = ["b-hoje", "b-tudo", "b-cache"].map(function (i) { return document.getElementById(i); });
+
+  let falhas = [];
+  let cartoes = {};
+  let execucao = 0;   // duas conferencias ao mesmo tempo dobram os pedidos e
+                      // fazem a Wikipedia cortar: so uma roda por vez
+
+  const dormir = function (ms) { return new Promise(function (ok) { setTimeout(ok, ms); }); };
 
   function cartao(filme, r) {
-    var ok = !r.gerada;
-    if (!ok) falhas.push(filme);
-    var d = document.createElement("div");
+    const ok = !r.gerada;
+    let d = cartoes[filme.id];
+    if (!d) {
+      d = document.createElement("div");
+      cartoes[filme.id] = d;
+      grade.appendChild(d);
+    }
     d.className = "item" + (ok ? "" : " falhou");
     d.innerHTML =
       '<img loading="lazy" src="' + r.url + '" alt="">' +
       '<div class="txt"><b>' + filme.titulo + "</b> (" + filme.ano + ")" +
       '<div class="fonte">' + (ok ? r.fonte : "NENHUMA IMAGEM") + "</div></div>";
-    grade.appendChild(d);
   }
 
-  function resumo(total) {
-    var ok = total - falhas.length;
+  function resumo(total, aviso) {
+    const ok = total - falhas.length;
     placar.innerHTML =
       "<div><b>" + total + "</b><span>testados</span></div>" +
       "<div><b style='color:var(--verde)'>" + ok + "</b><span>com cartaz</span></div>" +
       "<div><b style='color:var(--cortina)'>" + falhas.length + "</b><span>sem imagem</span></div>" +
       "<div><b>" + (total ? Math.round(ok / total * 100) : 0) + "%</b><span>cobertura</span></div>";
+    if (aviso) {
+      placar.insertAdjacentHTML("beforeend",
+        '<div style="grid-column:1/-1;border-color:var(--impulso)">' +
+        "<b style='font-size:.9rem'>" + aviso + "</b></div>");
+    }
     saida.value = falhas.length
       ? falhas.map(function (f) { return f.id + "  —  " + f.titulo + " (" + f.ano + ")"; }).join("\n")
       : "Nenhuma falha. Todos os cartazes carregaram.";
-    if (falhas.length > total * 0.15) {
-      placar.insertAdjacentHTML("beforeend",
-        '<div style="grid-column:1/-1;border-color:var(--cortina);color:var(--texto)">' +
-        "<b style='font-size:.9rem'>Muita falha junta</b>" +
-        "<span>pode ser limite de pedidos da Wikipedia, e não falta de cartaz. " +
-        "Espere um minuto, clique em <b>Limpar cache e repetir</b> e compare.</span></div>");
-    }
   }
 
-  /* Fila educada. A primeira versao disparava 4 pedidos de cada vez e a
-     Wikipedia cortou a partir do 170o filme (HTTP 429), fazendo parecer que
-     63 filmes nao tinham cartaz. Agora vai de dois em dois, com pausa entre
-     eles, e recua sozinha quando comeca a apanhar. */
-  function rodar(filmes) {
-    grade.innerHTML = ""; placar.innerHTML = ""; falhas = [];
-    var i = 0, prontos = 0, emCurso = 0, total = filmes.length;
-    var seguidas = 0, pausa = 140;
-
-    function proximo() {
-      if (i >= total) { if (emCurso === 0) resumo(total); return; }
-      var filme = filmes[i++]; emCurso++;
-      IMG.resolver(filme).then(function (r) {
-        cartao(filme, r);
-        prontos++; emCurso--;
-        barra.style.width = Math.round(prontos / total * 100) + "%";
-        if (r.gerada) {
-          seguidas++;
-          /* tres falhas seguidas cheiram a bloqueio: respira antes de seguir */
-          if (seguidas >= 3) { pausa = Math.min(3000, pausa * 2); seguidas = 0; }
-        } else {
-          seguidas = 0;
-          pausa = Math.max(140, pausa * 0.8);
-        }
-        setTimeout(proximo, pausa);
-      });
+  /* Uma passada pela lista, um filme de cada vez. Quem ja esta em cache nao
+     custa pedido nenhum e passa direto; os outros entram com pausa, que
+     cresce quando a Wikipedia comeca a recusar. */
+  async function passada(filmes, minha) {
+    let prontos = 0, seguidas = 0, pausa = 130;
+    const total = filmes.length;
+    for (const filme of filmes) {
+      if (minha !== execucao) return false;
+      const r = await IMG.resolver(filme);
+      cartao(filme, r);
+      if (r.gerada) {
+        falhas.push(filme);
+        seguidas++;
+        if (seguidas >= 3) { pausa = Math.min(2500, pausa * 2); seguidas = 0; }
+      } else {
+        seguidas = 0;
+        pausa = Math.max(130, Math.round(pausa * 0.85));
+      }
+      prontos++;
+      barra.style.width = Math.round(prontos / total * 100) + "%";
+      if (!r.doCache) await dormir(pausa);
     }
-    for (var k = 0; k < 2; k++) setTimeout(proximo, k * 200);
+    return true;
+  }
+
+  async function rodar(filmes) {
+    const minha = ++execucao;
+    botoes.forEach(function (b) { b.disabled = true; });
+    grade.innerHTML = ""; placar.innerHTML = ""; falhas = []; cartoes = {};
+    barra.style.width = "0";
+
+    let inteira = await passada(filmes, minha);
+    if (!inteira) return;
+    resumo(filmes.length);
+
+    /* Repescagem: limite de pedidos e por janela de tempo, entao esperar um
+       pouco e refazer SO o que falhou costuma resolver. */
+    for (let volta = 1; volta <= 2 && falhas.length; volta++) {
+      const lista = falhas.slice();
+      resumo(filmes.length, "Esperando 15s para repescar " + lista.length +
+        " filme(s) — falha em sequencia costuma ser limite de pedidos, nao falta de cartaz.");
+      await dormir(15000);
+      if (minha !== execucao) return;
+      IMG.esquecer(lista);
+      falhas = falhas.filter(function (f) { return lista.indexOf(f) < 0; });
+      resumo(filmes.length, "Repescagem " + volta + " de 2, com " + lista.length + " filme(s)...");
+      if (!await passada(lista, minha)) return;
+      resumo(filmes.length);
+    }
+
+    resumo(filmes.length, falhas.length
+      ? "Sobraram " + falhas.length + " depois de duas repescagens: esses provavelmente precisam de imagem fixada na mao."
+      : "Cobertura completa.");
+    botoes.forEach(function (b) { b.disabled = false; });
   }
 
   function marcar(id) {
@@ -139,7 +173,7 @@
   }
 
   function doDia() {
-    var s = CAL.filmesDoDia(CAL.hoje());
+    const s = CAL.filmesDoDia(CAL.hoje());
     return s[1].concat(s[2]);
   }
 
@@ -152,7 +186,7 @@
   document.getElementById("b-falhas").onclick = function () {
     navigator.clipboard && navigator.clipboard.writeText(saida.value);
     this.textContent = "Copiado!";
-    var b = this;
+    const b = this;
     setTimeout(function () { b.textContent = "Copiar lista de falhas"; }, 1500);
   };
 
