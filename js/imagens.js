@@ -6,8 +6,11 @@
   "use strict";
 
   var CFG = global.CARTAZ_CONFIG;
-  var CHAVE = "cartaz.v1.imagens";
+  /* v2: a virada pro TMDB invalida o que estava guardado da Wikipedia. Sem
+     trocar a chave, quem ja jogou continuaria 30 dias vendo o cartaz antigo. */
+  var CHAVE = "cartaz.v2.imagens";
   var cache = global.U.ler(CHAVE, {});
+  global.U.apagar("cartaz.v1.imagens");
   var pendentes = {};
 
   function agora() { return Date.now(); }
@@ -204,20 +207,45 @@
     return (global.U.hash(filme.id) % 3) === 0; /* no modo misto, 1 em cada 3 */
   }
 
-  function tmdb(filme, ctx) {
-    var chave = CFG.tmdbApiKey;
-    if (!chave) return Promise.resolve(null);
-    var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(chave) +
+  /* Busca no TMDB, que e catalogo curado: poster oficial por filme e por ano,
+     sem arte de fa no meio. O ano e conferido de novo em cima do resultado
+     porque titulo repetido e comum no cinema — remake, homonimo, o filme que
+     inspirou — e o parametro de ano do TMDB sozinho as vezes e generoso. */
+  function anoBate(r, ano) {
+    var d = String(r.release_date || "");
+    if (!d) return false;
+    return Math.abs(parseInt(d.slice(0, 4), 10) - ano) <= 1;
+  }
+
+  function daLista(resultados, filme) {
+    if (!resultados || !resultados.length) return null;
+    var certos = resultados.filter(function (r) { return anoBate(r, filme.ano); });
+    var fila = certos.length ? certos : [];
+    for (var i = 0; i < fila.length; i++) {
+      var r = fila[i];
+      if (querStill(filme) && r.backdrop_path) return "https://image.tmdb.org/t/p/w780" + r.backdrop_path;
+      if (r.poster_path) return "https://image.tmdb.org/t/p/w500" + r.poster_path;
+    }
+    return null;
+  }
+
+  function buscaTmdb(filme, ctx, comAno) {
+    var url = "https://api.themoviedb.org/3/search/movie?api_key=" + encodeURIComponent(CFG.tmdbApiKey) +
       "&language=" + encodeURIComponent(CFG.tmdbIdioma || "pt-BR") +
-      "&year=" + filme.ano +
+      "&include_adult=false" +
+      (comAno ? "&year=" + filme.ano : "") +
       "&query=" + encodeURIComponent(filme.original || filme.titulo);
     return jsonTeimoso(url, ctx).then(function (d) {
-      var r = d && d.results && d.results[0];
-      if (!r) return null;
-      var still = querStill(filme) && r.backdrop_path;
-      if (still) return "https://image.tmdb.org/t/p/w780" + r.backdrop_path;
-      if (r.poster_path) return "https://image.tmdb.org/t/p/w500" + r.poster_path;
-      return r.backdrop_path ? "https://image.tmdb.org/t/p/w780" + r.backdrop_path : null;
+      return daLista(d && d.results, filme);
+    });
+  }
+
+  function tmdb(filme, ctx) {
+    if (!CFG.tmdbApiKey) return Promise.resolve(null);
+    return buscaTmdb(filme, ctx, true).then(function (url) {
+      /* sem resultado com o ano: tenta de novo sem o filtro, porque ha filme
+         cuja data no TMDB e a de festival e nao a de estreia */
+      return url || buscaTmdb(filme, ctx, false);
     });
   }
 

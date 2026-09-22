@@ -49,10 +49,13 @@ window.CARTAZ_CONFIG = {
      A chave do TMDB, se usada, fica visivel no codigo do site — use uma
      chave de leitura (API Key v3), que e publica por natureza. */
   usarImagensLocais: false,
-  tmdbApiKey: "",
+  tmdbApiKey: "5795a8a4f9f420641c3fa6a894afcf10",
   tmdbIdioma: "pt-BR",
-  /* "cartaz" usa poster; "misto" alterna entre poster e still/backdrop */
-  tipoDeImagem: "misto",
+  /* "cartaz" usa poster; "misto" alterna entre poster e still/backdrop.
+     Esta em "cartaz" porque o jogo mostra a imagem dentro de uma vitrine de
+     cinema, e foto de cena deitada dentro de um quadro de poster fica errada.
+     Para experimentar still, trocar aqui e afrouxar a proporcao da moldura. */
+  tipoDeImagem: "cartaz",
   wikiIdiomas: ["pt", "en"],
   diasDeCacheDeImagem: 30,
 

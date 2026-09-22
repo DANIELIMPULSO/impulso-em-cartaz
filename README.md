@@ -159,13 +159,31 @@ Ache o filme pelo `id` em `dados/filmes.js` e acrescente o campo `imagem`:
 Ou ligue `usarImagensLocais: true` no `config.js` e ponha o arquivo em
 `dados/imagens/limite-1931.jpg`.
 
-### Usando o TMDB (opcional)
+### O TMDB (ligado)
 
-O TMDB tem cobertura melhor e traz também *stills* (fotos de cena). Pegue uma
-API Key v3 gratuita em themoviedb.org e preencha `tmdbApiKey` no `config.js`.
-A chave fica visível no código do site — use só a chave de leitura, que é
-pública por natureza. Com ela, `tipoDeImagem: "misto"` faz um em cada três
-desafios cair como still em vez de cartaz.
+O jogo usa o TMDB como primeira fonte. É um catálogo curado: pôster oficial por
+filme e por ano, sem arte de fã nem pôster alternativo no meio — que era o
+problema de depender só da Wikipedia. A Wikipedia continua como reserva, para
+o que o TMDB não tiver.
+
+A chave em `tmdbApiKey` é a **API Key v3**, que é pública por natureza: ela vive
+no código de todo site estático que usa TMDB e só serve para leitura. O *read
+access token* (v4) **não** deve ser posto aqui — é um bearer token da conta.
+Para revogar ou trocar a chave: themoviedb.org → Settings → API.
+
+O casamento é conferido duas vezes: busca com o ano e, se nada vier, busca sem
+o filtro, sempre exigindo que a data do resultado caia a um ano do esperado.
+Título repetido é comum no cinema (remake, homônimo, o filme que inspirou) e o
+filtro de ano do TMDB sozinho às vezes é generoso.
+
+`tipoDeImagem: "cartaz"` mantém só pôsteres. O TMDB também tem *stills* (fotos
+de cena), mas a imagem aparece dentro de uma vitrine de cinema no jogo, e foto
+deitada dentro de um quadro de pôster fica errada — para experimentar, trocar
+para `"misto"` e afrouxar a proporção da moldura no CSS.
+
+**Ao trocar de fonte, troque a versão do cache** (`CHAVE` em `js/imagens.js`):
+sem isso, quem já jogou continua 30 dias vendo a imagem antiga guardada no
+próprio navegador.
 
 ---
 
