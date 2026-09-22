@@ -505,11 +505,10 @@
 
   /* ================= tela: revelacao ================= */
 
+  /* sempre a mesma frase pro mesmo filme, pra quem rejoga um dia antigo nao
+     achar que o texto e aleatorio */
   function comentario(filme) {
-    var lista = PIADAS.porCategoria[filme.categoria];
-    var h = U.hash(filme.id + ":impulso");
-    if (lista && lista.length && h % 2 === 0) return lista[h % lista.length];
-    return PIADAS.geral[h % PIADAS.geral.length];
+    return PIADAS.geral[U.hash(filme.id + ":impulso") % PIADAS.geral.length];
   }
 
   function telaRevelacao() {

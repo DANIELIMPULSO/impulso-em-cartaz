@@ -1,89 +1,61 @@
-/* IMPULSO EM CARTAZ — textos de marca.
-   "Impulso comenta" aparece depois de cada filme revelado; os textos por
-   categoria tem prioridade, e o resto vem do monte geral. */
+/* IMPULSO EM CARTAZ — a voz da marca dentro do jogo.
+
+   Regra que nasceu de uma versão ruim: NENHUMA frase pode terminar em lição.
+   A versão anterior fazia sempre o mesmo movimento — observa o cinema, vira
+   pro leitor e diz "e o seu vídeo também precisa disso". Vendia mal e cansava
+   na terceira vez.
+
+   O que fica: a Impulso faz filme para empresa, gosta de cinema, e é só isso.
+   Sem detalhe de produção, sem promessa, sem virar consultoria. Quem está
+   jogando quer jogar. */
 window.CARTAZ_PIADAS = {
 
   geral: [
-    "Todo mundo quer o plano-sequência. Quase ninguém quer a reunião de pré-produção. A Impulso topa as duas.",
-    "Esse aqui tinha roteiro. O vídeo institucional do seu concorrente, nem tanto.",
-    "Um bom enquadramento resolve meio problema. O outro meio é briefing.",
-    "Cinema é caro. Vídeo institucional ruim é mais caro ainda, porque ninguém assiste.",
-    "Repare na luz. Depois repare na luz do vídeo da sua última convenção. Pois é.",
-    "Decupagem existe pra isso: pra ninguém descobrir na hora da montagem que faltou um plano.",
-    "A diferença entre 'gravar um vídeo' e 'fazer um filme' cabe num cronograma.",
-    "Aqui a trilha entra no tempo certo. No vídeo genérico de banco de imagens, também — e é esse o problema.",
-    "Se o seu vídeo corporativo precisa de locução explicando tudo, faltou imagem.",
-    "Nenhum diretor desse acervo abriu o projeto dizendo 'faz um negócio simples aí, pra ontem'.",
-    "Direção de arte não é enfeite: é o que faz a plateia acreditar antes do primeiro diálogo.",
-    "Toda marca tem uma história. A maioria conta ela em PowerPoint.",
-    "Quem entende de indústria filma chão de fábrica sem transformar em vídeo de treinamento.",
-    "A Impulso também gosta de final feliz — de preferência no relatório do trimestre.",
-    "Isso aqui é referência. Referência é ótimo em briefing e péssimo como cópia.",
-    "Um take a mais custa minutos. Um vídeo sem alma custa a campanha inteira.",
-    "Já reparou que filme bom nunca explica o que está mostrando? Vídeo de marca podia aprender.",
-    "Orçamento apertado não é desculpa pra plano feio. É desculpa pra plano mais esperto.",
-    "Todo mundo lembra do clímax. Ninguém lembra do slide 14.",
-    "Continuidade: o motivo de alguém no set anotar de que lado estava a xícara.",
-    "Se o vídeo da sua empresa fosse exibido num festival, ele ganharia o prêmio de quê?",
-    "Roteiro é onde se economiza dinheiro. Set é onde se gasta.",
-    "A Impulso trabalha com marca consolidada e briefing consultivo. Traduzindo: a gente pergunta bastante antes de ligar a câmera."
+    "A Impulso faz filme para empresa. O gosto por cinema é o que sobra do expediente.",
+    "Produtora é isso: um bando de cinéfilo com CNPJ.",
+    "A gente passa o dia filmando empresas e a noite discutindo filmes como esse.",
+    "Sim, a gente faz vídeo institucional. E sim, a gente também chora no fim de Cinema Paradiso.",
+    "Na Impulso ninguém entrou nessa por causa de reunião. Foi por causa de filme.",
+    "Esse aqui não é nosso, infelizmente. O que a gente faz são filmes para empresas.",
+    "Quem reconhece um filme pelo cartaz costuma reconhecer um vídeo bem feito também.",
+    "A Impulso existe porque alguém achou que empresa também merece um bom enquadramento.",
+    "Entre um take e outro, é disso que a gente fala no set.",
+    "A gente filma empresa. Mas é por causa de filme assim que a gente filma.",
+    "O pôster na parede da produtora é de cinema. O que sai daqui é filme de empresa.",
+    "Trabalhamos com indústria e marca grande. O amor, no fim do dia, é por sala escura.",
+    "Se um dia sua empresa quiser um filme, a gente é desse tipo de gente que repara na luz.",
+    "A Impulso faz filme para empresa. No resto do tempo, a gente joga isso aqui.",
+    "Vinte anos vendo cinema para saber filmar uma fábrica. Valeu a pena.",
+    "Tem gente que faz vídeo. A gente prefere dizer que faz filme — e é por isso que esse jogo existe.",
+    "Nenhum briefing começou com esse cartaz. Mas já começou com um parecido.",
+    "A gente vive de filmar quem produz, vende e constrói. E de assistir coisas como essa.",
+    "Cinéfilo que virou produtora: é literalmente a nossa biografia.",
+    "A Impulso faz filme para empresa. Este joguinho é o que a gente faz quando ninguém está pedindo nada.",
+    "Se você chegou até aqui, a gente já gosta de você.",
+    "Toda empresa tem uma história. A gente filma isso — mas hoje a história é a desse cartaz.",
+    "Na dúvida entre explicar o que a Impulso faz e deixar você jogar, a gente escolhe deixar você jogar.",
+    "A gente escolheu este acervo do mesmo jeito que escolhe um plano: com briga interna.",
+    "Filme de empresa é o nosso ofício. Cinema é o motivo.",
+    "Dia desses alguém do time errou esse aqui. Não vamos dizer quem."
   ],
-
-  porCategoria: {
-    "nacional": [
-      "Cinema brasileiro faz muito com pouco há décadas. É basicamente o nosso dia a dia de produção.",
-      "Aqui na Impulso a gente também acha que dá pra filmar o Brasil sem caricatura.",
-      "Produção nacional: prazo curto, verba curta, resultado que atravessa fronteira. Familiar?"
-    ],
-    "documentario": [
-      "Documentário é o parente mais próximo do vídeo institucional. A diferença é que um deles se importa com a verdade — e os dois deveriam.",
-      "Depoimento bom não se dirige, se conduz. É por isso que a gente conversa antes de gravar.",
-      "Documentarista sabe: a melhor fala aparece depois que a pessoa esquece a câmera."
-    ],
-    "vanguarda": [
-      "Ousar é ótimo. Ousar sem objetivo é como aprovar um roteiro no susto.",
-      "Vanguarda no cinema: revolução. Vanguarda no vídeo da convenção: reunião de emergência.",
-      "Esse filme quebrou regras que nem existiam. Sua marca provavelmente só precisa quebrar o padrão do concorrente."
-    ],
-    "hollywood-classico": [
-      "Em 1940 já sabiam que contraste e sombra vendem mais que resolução.",
-      "Studio system: cronograma, equipe fixa e entrega. Basicamente uma produtora bem organizada — de novo."
-    ],
-    "hollywood-moderno": [
-      "Blockbuster é isso: milhões em tela e uma ideia que cabe numa frase. Seu vídeo também precisa dessa frase.",
-      "Hollywood gasta fortunas pra parecer natural. A gente faz mais barato, mas o princípio é o mesmo."
-    ],
-    "europeu": [
-      "Silêncio também é informação. Tente isso na próxima apresentação de resultados.",
-      "Cinema europeu: duas horas pra dizer uma coisa. Vídeo de marca: trinta segundos. O desafio é o mesmo."
-    ],
-    "mundo": [
-      "Boa história atravessa idioma. É por isso que legenda nunca atrapalhou filme bom.",
-      "Repertório de fora ajuda a fugir do vídeo corporativo padrão que todo mundo já viu."
-    ],
-    "animacao": [
-      "Animação é planejamento puro: nada acontece por acaso, nem um piscar de olho.",
-      "Storyboard salva animação e salva orçamento. E salva reunião."
-    ]
-  },
 
   /* fechamento da sessao, por desempenho (0 a 16 pontos) */
   fechamento: {
     otimo: [
-      "Repertório de festival. Se um dia quiser transformar isso em carreira, a Impulso está contratando olhos assim.",
-      "Palma de Ouro. Agora só falta alguém te pagar pra assistir filme — spoiler: é basicamente o nosso trabalho."
+      "Repertório desse tamanho a gente respeita.",
+      "Isso foi exibição de conhecimento. Amanhã tem mais."
     ],
     bom: [
-      "Boa sessão. Nível 'já discutiu montagem em mesa de bar' — a gente respeita.",
-      "Quase tudo. Falta pouco pra virar aquele amigo insuportável que sempre sabe o diretor."
+      "Boa sessão. Amanhã tem outra.",
+      "Quase lá. Amanhã tem mais quatro."
     ],
     medio: [
-      "Sessão honesta. Dá pra melhorar, igual vídeo institucional de 2012.",
-      "Meio a meio, como todo primeiro corte."
+      "Deu pro gasto. Amanhã tem sessão nova.",
+      "Meio a meio — melhor que muita estreia."
     ],
     ruim: [
-      "Tudo bem: até diretor premiado erra o primeiro take. Volta amanhã que tem mais quatro.",
-      "Esse foi direto pro streaming. Amanhã tem sessão nova — e a gente promete cartazes mais amigáveis."
+      "Faz parte. Amanhã tem outra chance.",
+      "Dia ruim acontece até em festival. Volta amanhã."
     ]
   }
 };
