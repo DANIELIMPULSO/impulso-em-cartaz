@@ -58,7 +58,7 @@ window.CARTAZ_CONFIG = {
      consentimento. Para o contador aparecer no rodape, ligue tambem
      "Allow adding visitor counts to your website" nas Settings do painel. */
   metricas: {
-    goatcounter: "",
+    goatcounter: "impulso-em-cartaz",
     mostrarContador: true
   },
 
