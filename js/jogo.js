@@ -146,6 +146,7 @@
       b.onclick = function () { abrirSessao(estado.dia, +b.dataset.sessao); };
     });
     pintarLogos();
+    ligarChamada();
     mostrar("sessoes");
   }
 
@@ -185,6 +186,18 @@
     });
   }
 
+  /* o clique no botao da chamada e a metrica que interessa pro negocio:
+     quanta gente sai do joguinho pro site da Impulso */
+  function ligarChamada() {
+    Array.prototype.forEach.call(document.querySelectorAll(".chamada a.cta, .logo-impulso"), function (a) {
+      if (a.dataset.contado) return;
+      a.dataset.contado = "1";
+      a.addEventListener("click", function () {
+        global.METRICAS.evento("saiu-pra-impulso", "Clicou para o site da Impulso");
+      });
+    });
+  }
+
   function chamadaImpulso() {
     return '<div class="chamada"><div class="regua"></div><div class="miolo">' +
       logotipo() + "<h3>" + esc(CFG.chamada.titulo) + "</h3><p>" +
@@ -198,6 +211,12 @@
     estado.dia = dia;
     estado.sessao = sessao;
     var p = partida(dia, sessao, true);
+    if (!p.contado) {
+      p.contado = true;
+      salvar();
+      global.METRICAS.evento("sessao-aberta/" + sessao, "Sessão " + sessao + " aberta");
+      if (dia !== HOJE) global.METRICAS.evento("cinemateca", "Dia anterior jogado");
+    }
     if (p.fim) return telaFim();
     while (p.atual < p.itens.length && p.itens[p.atual].fim) p.atual++;
     if (p.atual >= p.itens.length) { p.fim = true; salvar(); return telaFim(); }
@@ -482,6 +501,12 @@
   function telaFim() {
     var p = partida(estado.dia, estado.sessao);
     var pontos = pontosDa(p);
+    if (!p.fimContado) {
+      p.fimContado = true;
+      salvar();
+      global.METRICAS.evento("partida-concluida", "Sessão concluída");
+      global.METRICAS.evento("pontos/" + pontos, "Fechou com " + pontos + " de 16");
+    }
     var max = p.itens.length * CFG.tentativasPorDesafio;
     var estrelas = Math.round(pontos / max * 4);
     var acertos = p.itens.filter(function (i) { return i.acertou; }).length;
@@ -514,10 +539,14 @@
       '<div class="botoes"><button class="botao secundario" style="flex:1" id="btn-voltar-sessoes">Voltar</button></div>' +
       chamadaImpulso();
 
-    $("btn-compartilhar").onclick = function () { compartilhar(p, this); };
+    $("btn-compartilhar").onclick = function () {
+      global.METRICAS.evento("compartilhou", "Compartilhou o resultado");
+      compartilhar(p, this);
+    };
     if (proxima) $("btn-proxima-sessao").onclick = function () { abrirSessao(estado.dia, proxima.id); };
     $("btn-voltar-sessoes").onclick = telaSessoes;
     pintarLogos();
+    ligarChamada();
     mostrar("fim");
   }
 
@@ -683,12 +712,21 @@
 
   function rodape() {
     $("rodape").innerHTML =
+      '<span id="contador-publico"></span>' +
       "Um joguinho da " + logotipo() + "<br>" +
       '<a href="' + CFG.site + '" target="_blank" rel="noopener">' + esc(CFG.siteRotulo) + "</a><br>" +
       esc(CFG.creditoImagens);
+
+    global.METRICAS.frase().then(function (texto) {
+      var alvo = $("contador-publico");
+      if (!texto || !alvo) return;
+      alvo.innerHTML = esc(texto) + "<br>";
+      alvo.style.color = "var(--impulso)";
+    });
   }
 
   function iniciar() {
+    global.METRICAS.instalar();
     var sessaoPedida = lerParametros();
     rodape();
     pintarLogos();

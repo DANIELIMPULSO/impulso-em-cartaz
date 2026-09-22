@@ -50,6 +50,18 @@ window.CARTAZ_CONFIG = {
   wikiIdiomas: ["pt", "en"],
   diasDeCacheDeImagem: 30,
 
+  /* --- medicao ---
+     Codigo do site no GoatCounter: se o painel dele fica em
+     impulso-em-cartaz.goatcounter.com, aqui vai "impulso-em-cartaz".
+     Vazio = nenhum script de terceiro e carregado.
+     O GoatCounter nao usa cookie, entao o jogo nao precisa de aviso de
+     consentimento. Para o contador aparecer no rodape, ligue tambem
+     "Allow adding visitor counts to your website" nas Settings do painel. */
+  metricas: {
+    goatcounter: "",
+    mostrarContador: true
+  },
+
   /* --- textos --- */
   creditoImagens: "Imagens: Wikipedia / TMDB · uso ilustrativo, sem fins comerciais diretos.",
   chamada: {

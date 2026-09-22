@@ -168,6 +168,40 @@ Arial.
 
 ---
 
+## Medição de audiência
+
+O jogo usa o **GoatCounter**: sem cookie, sem identificar ninguém e, por isso,
+sem necessidade de banner de consentimento. Enquanto `metricas.goatcounter`
+estiver vazio no `config.js`, **nenhum script de terceiro é carregado**.
+
+Para ligar: crie o site em goatcounter.com e ponha o código no `config.js`
+(se o painel fica em `impulso-em-cartaz.goatcounter.com`, o código é
+`impulso-em-cartaz`). Além das visitas, o jogo marca estes eventos:
+
+| Evento | Quando dispara |
+|---|---|
+| `sessao-aberta/1` e `/2` | alguém começa uma sessão |
+| `partida-concluida` | terminou os quatro cartazes |
+| `pontos/0` … `pontos/16` | com quanto fechou — mostra se está fácil ou difícil demais |
+| `compartilhou` | clicou em compartilhar o resultado |
+| `cinemateca` | jogou um dia anterior |
+| `saiu-pra-impulso` | **clicou para o site da Impulso** — a métrica de negócio |
+
+### O contador no rodapé
+
+Para o jogo exibir "N sessões jogadas · M visitas", ligue em
+**Settings → Allow adding visitor counts to your website** no painel do
+GoatCounter. Sem isso o número simplesmente não aparece, e nada quebra.
+
+### Sobre `dados/nomes.js`
+
+Esse arquivo valida apelidos e barra palavrão, ofensa e spam — está pronto e
+testado, mas **não é carregado hoje**, porque o jogo não tem placar com nome.
+Ficou guardado para o dia em que houver: placar compartilhado exige um servidor
+(o GitHub Pages não guarda dado), e aí ele entra junto.
+
+---
+
 ## Mexendo no acervo
 
 Cada filme precisa destes campos:
