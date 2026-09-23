@@ -185,8 +185,10 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
 .cabeca{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin:16px 0 14px}
 .cabeca h1{font-size:1.65rem}
 .cabeca h1 i{font-style:normal;color:var(--ambar)}
-.trilha{display:flex;gap:5px;flex:0 0 auto}
-.trilha i{width:26px;height:3px;border-radius:2px;background:var(--linha);display:block}
+.trilha{display:flex;gap:4px;flex:0 0 auto}
+/* com 6 cartazes por sessao a trilha tem 6 tracinhos: estreitos o bastante
+   pra caber ao lado do titulo num celular de 360px */
+.trilha i{width:16px;height:3px;border-radius:2px;background:var(--linha);display:block}
 .trilha i.ok{background:var(--verde)}
 .trilha i.errou{background:var(--vermelho)}
 .trilha i.agora{background:var(--ambar)}
@@ -404,7 +406,7 @@ h1,h2,h3,.placar .nota,.resultado-tarja{font-family:var(--fonte-titulo);font-wei
   .jogo-grade .moldura{aspect-ratio:3/4;height:min(58vh,520px);width:auto}
   .cabeca{display:block;margin:0 0 24px}
   .cabeca h1{font-size:2.6rem;margin-bottom:12px}
-  .trilha i{width:42px}
+  .trilha i{width:34px}
   .dicas{flex-direction:column;align-items:flex-start}
   .dica{width:100%;border-radius:14px;padding:11px 16px;font-size:.88rem}
 

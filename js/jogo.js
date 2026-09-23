@@ -81,6 +81,19 @@
   function pontosDa(p) {
     return p.itens.reduce(function (s, i) { return s + i.pontos; }, 0);
   }
+
+  /* pontuacao maxima da sessao: cartazes x tentativas. Fica calculado porque
+     ja mudou duas vezes (4 cartazes valiam 16; 6 valem 24) e todo numero
+     escrito a mao vira mentira na proxima mudanca. */
+  function maximoDa(p) {
+    return p.itens.length * CFG.tentativasPorDesafio;
+  }
+  function maximoDaSessao() {
+    return CFG.desafiosPorSessao * CFG.tentativasPorDesafio;
+  }
+  function cartazesPorDia() {
+    return CFG.desafiosPorSessao * CFG.sessoes.length;
+  }
   function situacao(dia, sessao) {
     var p = partidas[chave(dia, sessao)];
     if (!p) return "nova";
@@ -114,7 +127,7 @@
     var liberada = s.id === 1 || sessao2Liberada(dia);
     var p = partidas[chave(dia, s.id)];
     var carimbo = "";
-    if (st === "fim") carimbo = '<span class="carimbo ok">' + pontosDa(p) + "/16</span>";
+    if (st === "fim") carimbo = '<span class="carimbo ok">' + pontosDa(p) + "/" + maximoDa(p) + "</span>";
     else if (st === "andamento") carimbo = '<span class="carimbo andamento">em andamento</span>';
     else if (!liberada) carimbo = '<span class="carimbo fechada">fechada</span>';
 
@@ -133,7 +146,7 @@
       '<span class="nome">' + esc(s.nome) + "</span>" +
       '<span class="recado">' + esc(recado) + "</span>" +
       '<span class="rodape-ingresso"><span>Dia ' + dia + "</span>" +
-      "<span>" + esc(U.dataCurta(d)) + "</span><span>4 cartazes</span></span>" +
+      "<span>" + esc(U.dataCurta(d)) + "</span><span>" + CFG.desafiosPorSessao + " cartazes</span></span>" +
       "</span>" +
       '<span class="canhoto"><span class="serie">' + (i === 0 ? "01" : "02") + "</span>" +
       '<span class="admite">admite<br>um</span></span>' +
@@ -158,7 +171,7 @@
       '<p class="data">Dia ' + estado.dia + " · " + U.dataCurta(d) + "</p>" +
       "</div></div>" +
       '<p class="apresentacao">Reconhecer um filme pelo cartaz é fácil. ' +
-      "Com quatorze quadradinhos, nem tanto. <b>Oito por dia, em duas sessões</b> — " +
+      "Com quatorze quadradinhos, nem tanto. <b>" + cartazesPorDia() + " por dia, em duas sessões</b> — " +
       "quatro tentativas cada, e a imagem só clareia quando você erra.</p></div>" +
       '<div class="lista-sessoes">';
 
@@ -552,17 +565,22 @@
 
   /* ================= tela: fim de sessao ================= */
 
-  function nota(pontos) {
-    if (pontos >= 16) return "PALMA DE OURO";
-    if (pontos >= 13) return "OBRA-PRIMA";
-    if (pontos >= 10) return "CULT";
-    if (pontos >= 7) return "SESSÃO DA TARDE";
-    if (pontos >= 4) return "DIRETO PRO STREAMING";
+  /* Por proporcao, e nao por numero fixo: os cortes sao os mesmos de quando a
+     sessao tinha 4 cartazes (13, 10, 7 e 4 de 16), so que agora acompanham
+     qualquer tamanho de sessao. */
+  function nota(pontos, maximo) {
+    var f = maximo ? pontos / maximo : 0;
+    if (f >= 1) return "PALMA DE OURO";
+    if (f >= 0.8) return "OBRA-PRIMA";
+    if (f >= 0.62) return "CULT";
+    if (f >= 0.43) return "SESSÃO DA TARDE";
+    if (f >= 0.25) return "DIRETO PRO STREAMING";
     return "CORTADO NA ILHA";
   }
 
-  function fechamento(pontos) {
-    var grupo = pontos >= 13 ? "otimo" : pontos >= 9 ? "bom" : pontos >= 5 ? "medio" : "ruim";
+  function fechamento(pontos, maximo) {
+    var f = maximo ? pontos / maximo : 0;
+    var grupo = f >= 0.8 ? "otimo" : f >= 0.56 ? "bom" : f >= 0.31 ? "medio" : "ruim";
     var lista = PIADAS.fechamento[grupo];
     return lista[(estado.dia + estado.sessao) % lista.length];
   }
@@ -578,11 +596,11 @@
   function textoDesafio(p, eu, amigo) {
     var linhas = [];
     linhas.push("\uD83C\uDFAC " + (amigo ? amigo + ", quantos" : "Quantos") +
-      " filmes você reconhece só pelo cartaz desfocado?");
+      " filmes você reconhece só pelo cartaz quadriculado?");
     linhas.push("");
-    linhas.push("Meu placar de hoje: " + gradeEmoji(p) + " " + pontosDa(p) +
-      "/" + (p.itens.length * CFG.tentativasPorDesafio));
-    linhas.push("São 8 cartazes por dia, 4 tentativas cada. Bate esse?");
+    linhas.push("Meu placar de hoje: " + gradeEmoji(p) + " " + pontosDa(p) + "/" + maximoDa(p));
+    linhas.push("São " + cartazesPorDia() + " cartazes por dia, " +
+      CFG.tentativasPorDesafio + " tentativas cada. Bate esse?");
     linhas.push("");
     linhas.push(CFG.urlDoJogo);
     if (eu) {
@@ -642,7 +660,7 @@
   function textoCompartilhavel(p) {
     var nome = CFG.sessoes.filter(function (s) { return s.id === p.sessao; })[0].nome;
     return CFG.nome + " · Dia " + p.dia + " · " + nome + "\n" +
-      gradeEmoji(p) + "  " + pontosDa(p) + "/" + (p.itens.length * CFG.tentativasPorDesafio) + "\n" +
+      gradeEmoji(p) + "  " + pontosDa(p) + "/" + maximoDa(p) + "\n" +
       CFG.urlDoJogo;
   }
 
@@ -655,7 +673,7 @@
       global.METRICAS.evento("partida-concluida", "Sessão concluída");
       global.METRICAS.evento("pontos/" + pontos, "Fechou com " + pontos + " de 16");
     }
-    var max = p.itens.length * CFG.tentativasPorDesafio;
+    var max = maximoDa(p);
     var estrelas = Math.round(pontos / max * 4);
     var acertos = p.itens.filter(function (i) { return i.acertou; }).length;
     var indiceProxima = -1;
@@ -673,11 +691,11 @@
     $("tela-fim").innerHTML =
       '<div class="coluna-estreita"><div class="placar">' +
       '<div class="estrelas">' + "★".repeat(estrelas) + "☆".repeat(4 - estrelas) + "</div>" +
-      '<p class="nota">' + nota(pontos) + "</p>" +
+      '<p class="nota">' + nota(pontos, max) + "</p>" +
       '<p class="de">' + pontos + " de " + max + " pontos · " + acertos + " de " + p.itens.length + " cartazes</p>" +
       "</div>" +
       '<div class="grade-resultado"><span>' + gradeEmoji(p) + "</span></div>" +
-      '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(fechamento(pontos)) + "</div>" +
+      '<div class="impulso-comenta"><b>A Impulso comenta</b>' + esc(fechamento(pontos, max)) + "</div>" +
       '<ul class="resumo-lista">' + lista + "</ul>" +
       (proxima
         ? '<div class="proximo-ingresso"><p class="dica-titulo">Seu próximo ingresso</p>' +
@@ -834,11 +852,14 @@
   function telaAjuda() {
     modal(
       "<h2>Como se joga</h2>" +
-      "<p>Todo dia o " + CFG.nome + " abre <b>duas sessões</b> de <b>quatro cartazes</b> cada. " +
+      "<p>Todo dia o " + CFG.nome + " abre <b>" + CFG.sessoes.length + " sessões</b> de <b>" +
+      CFG.desafiosPorSessao + " cartazes</b> cada. " +
       "A imagem começa desfocada e ampliada; a cada erro ela clareia e aparece uma dica nova.</p>" +
       "<ul>" +
       "<li>O cartaz aparece <b>quadriculado</b> e ganha definição a cada erro.</li>" +
-      "<li>Você tem <b>4 tentativas</b> por cartaz. Acertar de primeira vale 4 pontos, depois 3, 2 e 1.</li>" +
+      "<li>Você tem <b>" + CFG.tentativasPorDesafio + " tentativas</b> por cartaz. Acertar de primeira " +
+      "vale " + CFG.tentativasPorDesafio + " pontos, e vai caindo até 1. A sessão inteira vale " +
+      maximoDaSessao() + ".</li>" +
 
       "<li>Pode digitar o título em português ou o original — o campo sugere enquanto você escreve.</li>" +
       "<li>A <b>" + esc(CFG.sessoes[1].nome) + "</b> abre quando você termina a <b>" + esc(CFG.sessoes[0].nome) + "</b>.</li>" +

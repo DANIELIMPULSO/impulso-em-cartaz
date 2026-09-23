@@ -19,7 +19,7 @@ window.CARTAZ_CONFIG = {
   dataInicio: "2026-09-22",
 
   /* --- partida --- */
-  desafiosPorSessao: 4,
+  desafiosPorSessao: 6,
   tentativasPorDesafio: 4,
   /* Quantos quadradinhos de largura o cartaz tem em cada etapa, da primeira
      tentativa ate a ultima. Numero menor = mais dificil. Desfoque escondia
@@ -28,8 +28,8 @@ window.CARTAZ_CONFIG = {
   blocosPorEtapa: [14, 22, 28, 90],
 
   sessoes: [
-    { id: 1, nome: "Matinê",             abertura: "Quatro cartazes pra começar o dia." },
-    { id: 2, nome: "Sessão da Meia-Noite", abertura: "Mais quatro, e agora sem dó." }
+    { id: 1, nome: "Matinê",             abertura: "Pra começar o dia." },
+    { id: 2, nome: "Sessão da Meia-Noite", abertura: "Agora sem dó." }
   ],
   /* como a segunda sessao do dia libera:
      "aposessao1" — assim que a pessoa termina a Matine (recomendado)
