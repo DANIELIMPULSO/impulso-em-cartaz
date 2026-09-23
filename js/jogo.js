@@ -854,7 +854,7 @@
       "<h2>Como se joga</h2>" +
       "<p>Todo dia o " + CFG.nome + " abre <b>" + CFG.sessoes.length + " sessões</b> de <b>" +
       CFG.desafiosPorSessao + " cartazes</b> cada. " +
-      "A imagem começa desfocada e ampliada; a cada erro ela clareia e aparece uma dica nova.</p>" +
+      "O cartaz começa quadriculado grosso; a cada erro ele ganha definição e aparece uma dica nova.</p>" +
       "<ul>" +
       "<li>O cartaz aparece <b>quadriculado</b> e ganha definição a cada erro.</li>" +
       "<li>Você tem <b>" + CFG.tentativasPorDesafio + " tentativas</b> por cartaz. Acertar de primeira " +
