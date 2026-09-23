@@ -1,8 +1,8 @@
 # Impulso em Cartaz
 
 Um joguinho diário de adivinhar filme pelo cartaz, feito para a **Impulso Filmes**.
-No espírito do Wordle: todo dia o jogo abre **duas sessões de quatro cartazes** cada,
-a imagem começa desfocada e ampliada, e vai clareando a cada erro.
+No espírito do Wordle: todo dia o jogo abre **duas sessões de seis cartazes** cada,
+a imagem começa quadriculada em blocos grandes e vai se revelando a cada erro.
 
 Site estático puro — HTML, CSS e JavaScript, sem build, sem framework, sem backend,
 sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
@@ -48,20 +48,20 @@ sem login e sem cookie. O histórico de quem joga fica no próprio navegador.
 
 ## O acervo
 
-234 filmes, de 1902 a 2024, distribuídos assim:
+434 filmes, de 1902 a 2024, distribuídos assim:
 
 | Categoria | Filmes |
 |---|---|
-| Hollywood moderno | 53 |
+| Hollywood moderno | 153 |
+| Documentário (quase todos de 2000 pra cá) | 85 |
+| Nacional | 83 |
 | Europeu | 39 |
-| Documentário (quase todos de 2000 pra cá) | 35 |
-| Nacional | 33 |
 | Hollywood clássico | 28 |
 | Cinema mundial (Ásia, América Latina, África) | 18 |
 | Vanguarda e experimental | 15 |
 | Animação | 13 |
 
-Cada dia consome 8 filmes, então o jogo passa **29 dias sem repetir um cartaz**.
+Cada dia consome 12 filmes, então o jogo passa **36 dias sem repetir um cartaz**.
 As categorias são distribuídas de forma proporcional: cada dia cai com 5 a 8
 categorias diferentes, e a Matinê é sempre mais leve que a Sessão da Meia-Noite
 (nível médio 1,6 contra 2,8).
@@ -145,8 +145,9 @@ pedidos da Wikipedia (HTTP 429), e não falta de cartaz. Só uma conferência ro
 por vez, de propósito: duas ao mesmo tempo dobram os pedidos e provocam
 justamente o bloqueio que a ferramenta deveria medir.
 
-> **Conferido em 22/09/2026: cobertura de 100%** — os 234 filmes acharam cartaz
-> pela Wikipedia, sem precisar de chave do TMDB.
+> **Conferido em 22/09/2026: cobertura de 100%** nos 234 filmes daquela data.
+> Os 200 títulos acrescentados depois ainda não passaram pela conferência —
+> rode `ferramentas/diagnostico.html` antes de divulgar.
 
 ### Consertando um cartaz
 
@@ -201,13 +202,14 @@ assets/fontes/             Anton, Work Sans e IBM Plex Mono servidas pelo própr
 assets/logo-impulso.png    logotipo oficial da Impulso
 assets/og.jpg              arte que aparece quando o link é compartilhado
 assets/icone-180.png       ícone de tela de início no celular
-dados/filmes.js            o acervo: 234 filmes                            ← mexa aqui
+dados/filmes.js            o acervo: 434 filmes                            ← mexa aqui
 dados/piadas.js            os textos de marca ("A Impulso comenta")        ← mexa aqui
 js/util.js                 texto, sorteio estável, datas, armazenamento
 js/calendario.js           qual filme cai em que dia
 js/imagens.js              resolução e cache de cartazes
 js/jogo.js                 motor, telas e arquivo de partidas
 ferramentas/diagnostico.html   conferência de cartazes
+ferramentas/arte-og.html       a arte de compartilhamento (abra e tire um print 1200x630)
 ```
 
 ### O logotipo
@@ -245,8 +247,8 @@ Para ligar: crie o site em goatcounter.com e ponha o código no `config.js`
 | Evento | Quando dispara |
 |---|---|
 | `sessao-aberta/1` e `/2` | alguém começa uma sessão |
-| `partida-concluida` | terminou os quatro cartazes |
-| `pontos/0` … `pontos/16` | com quanto fechou — mostra se está fácil ou difícil demais |
+| `partida-concluida` | terminou os cartazes da sessão |
+| `pontos/0` … `pontos/24` | com quanto fechou — mostra se está fácil ou difícil demais |
 | `compartilhou` | clicou em compartilhar o resultado |
 | `cinemateca` | jogou um dia anterior |
 | `desafiou-amigo` | abriu o WhatsApp com o desafio pronto |

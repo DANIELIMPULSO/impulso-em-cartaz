@@ -1,0 +1,56 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../assets/fontes/fontes.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1200px;height:630px;overflow:hidden;background:#0e0e10}
+.og{position:relative;width:1200px;height:630px;background:
+  radial-gradient(900px 600px at 78% 45%, rgba(253,185,8,.10), transparent 60%),
+  linear-gradient(120deg,#0e0e10 0%,#151417 55%,#1c1a14 100%);}
+.faixa{position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#3b6fd4,#7a4fd1,#d13f6d,#fdb908,#3fae6a,#2fa3c9,#d1503f)}
+.texto{position:absolute;left:62px;top:124px;width:640px}
+.marca{font-family:Anton,sans-serif;font-size:66px;line-height:1;letter-spacing:.01em;color:#fdb908;text-transform:uppercase;display:flex;align-items:flex-end;gap:7px}
+.marca small{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.22em;color:#fdb908;line-height:1;padding-bottom:7px}
+h1{font-family:Anton,sans-serif;font-size:106px;line-height:1.02;letter-spacing:.005em;color:#f4f2ee;text-transform:uppercase;margin-top:16px}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;letter-spacing:.24em;color:#fdb908;text-transform:uppercase;margin-top:26px}
+p{font-family:'Work Sans',sans-serif;font-size:23px;line-height:1.5;color:#cfcac2;margin-top:18px;white-space:nowrap}
+.rodape{font-family:'IBM Plex Mono',monospace;font-size:16px;letter-spacing:.17em;color:#8b857c;text-transform:uppercase;margin-top:28px}
+.cartas{position:absolute;right:26px;top:74px;width:470px;height:520px}
+.carta{position:absolute;width:214px;height:312px;border-radius:15px;box-shadow:0 26px 60px rgba(0,0,0,.6);overflow:hidden}
+.c1{left:0px;  top:76px;  transform:rotate(-11deg)}
+.c2{left:118px;top:24px;  transform:rotate(-3deg)}
+.c3{left:228px;top:96px;  transform:rotate(6deg)}
+.carta canvas{position:absolute;inset:0;width:100%;height:100%}
+.carta span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:Anton,sans-serif;font-size:96px;color:#fdb908;opacity:.85}
+.c1 span{opacity:.32;font-size:78px}
+.c2 span{opacity:.5;font-size:86px}
+</style></head><body>
+<div class="og">
+  <div class="faixa"></div>
+  <div class="texto">
+    <div class="marca">Impulso<small>Filmes</small></div>
+    <h1>Em Cartaz</h1>
+    <div class="kicker">Um joguinho pra cinéfilo</div>
+    <p>Doze cartazes quadriculados por dia, em duas sessões.<br>Quatro tentativas em cada um. De Méliès a Bacurau.</p>
+    <div class="rodape">434 filmes &middot; sem login &middot; impulsofilmes.com.br</div>
+  </div>
+  <div class="cartas">
+    <div class="carta c1"><canvas data-b="9" data-s="41"></canvas><span>?</span></div>
+    <div class="carta c2"><canvas data-b="13" data-s="77"></canvas><span>?</span></div>
+    <div class="carta c3"><canvas data-b="18" data-s="12"></canvas><span>?</span></div>
+  </div>
+</div>
+<script>
+// mosaico decorativo: blocos de cor no tom de cada cartaz, como o jogo mostra na primeira etapa
+var tons=[[62,48,92],[24,44,78],[30,34,66]];
+document.querySelectorAll('.carta canvas').forEach(function(cv,i){
+  var L=214,A=312; cv.width=L; cv.height=A;
+  var b=+cv.dataset.b, s=+cv.dataset.s, base=tons[i];
+  var lin=Math.round(b*A/L), px=L/b, py=A/lin, ctx=cv.getContext('2d');
+  function r(){ s=(s*1664525+1013904223)%4294967296; return s/4294967296; }
+  for(var y=0;y<lin;y++) for(var x=0;x<b;x++){
+    var v=(r()-.5)*46, c=base.map(function(n){ return Math.max(0,Math.min(255,Math.round(n+v))); });
+    ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')';
+    ctx.fillRect(Math.floor(x*px),Math.floor(y*py),Math.ceil(px),Math.ceil(py));
+  }
+});
+</script></body></html>
